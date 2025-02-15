@@ -1,12 +1,11 @@
 "use client";
 
-import {
-  createConnectSession,
-  createUser,
-} from "@/features/bridge/bridge.action";
-import { getAccessToken } from "@/features/bridge/bridge.utils";
-import { requiredCurrentUser } from "@/features/user/user.action";
 import { useEffect, useState } from "react";
+import {
+  createUser,
+  createConnectSession,
+} from "@/features/bridge/bridge.action";
+import { requiredCurrentUser } from "@/features/user/user.action";
 
 export const AddBankButton = () => {
   const [bridgeUrl, setBridgeUrl] = useState<string | null>(null);
@@ -16,10 +15,9 @@ export const AddBankButton = () => {
     const initToBridge = async () => {
       try {
         const user = await requiredCurrentUser();
-        if (!user?.isCreatedOnBridge) await createUser(user.id);
-        const accessToken = await getAccessToken(user.id);
-        const item = await createConnectSession(accessToken, user.email);
-        setBridgeUrl(item.url);
+        if (!user?.isCreatedOnBridge) await createUser();
+        const item = await createConnectSession();
+        if (item?.data?.url) setBridgeUrl(item.data.url);
       } catch (err) {
         console.error(err);
       } finally {

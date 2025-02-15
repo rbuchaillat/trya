@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { authorizationToken } from "./bridge.action";
+import { refreshAccessToken, storeAccessToken } from "./bridge.action";
 
 export const getAccessToken = async (userId: string) => {
   const userToken = await prisma.userToken.findFirst({
@@ -9,21 +9,17 @@ export const getAccessToken = async (userId: string) => {
   });
 
   if (!userToken) {
-    const data = await refreshAccessToken(userId);
-    return data.access_token;
+    const response = await storeAccessToken();
+    return response?.data?.access_token;
   }
 
   const now = new Date();
   const expiresAt = new Date(userToken.expires_at);
 
   if (expiresAt <= now) {
-    const data = await refreshAccessToken(userId);
-    return data.access_token;
+    const response = await refreshAccessToken({ userTokenId: userToken.id });
+    return response?.data?.access_token;
   }
 
   return userToken.access_token;
-};
-
-export const refreshAccessToken = async (userId: string) => {
-  return await authorizationToken(userId);
 };
