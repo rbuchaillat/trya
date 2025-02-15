@@ -8,6 +8,7 @@ import {
   authActionClientWithAccessToken,
 } from "@/lib/safe-action";
 import {
+  AccountResponse,
   AccountsResponse,
   AuthorizationTokenResponse,
   CreateConnectSessionResponse,
@@ -200,6 +201,36 @@ export const getAccountsByItemId = authActionClientWithAccessToken
     }
 
     const data: AccountsResponse = await response.json();
+
+    if (!data) {
+      throw new Error("Error getting accounts");
+    }
+
+    return data;
+  });
+
+export const getAccount = authActionClientWithAccessToken
+  .schema(
+    z.object({
+      id: z.number(),
+    })
+  )
+  .action(async ({ parsedInput: { id }, ctx: { accessToken } }) => {
+    const response = await fetch(
+      `https://api.bridgeapi.io/v3/aggregation/accounts/${id}`,
+      {
+        headers: {
+          ...defaultHeaders,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status} : ${response.statusText}`);
+    }
+
+    const data: AccountResponse = await response.json();
 
     if (!data) {
       throw new Error("Error getting account");

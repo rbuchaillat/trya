@@ -1,4 +1,6 @@
+import { PizzaIcon } from "lucide-react";
 import { signInWithGoogleAction } from "@/features/user/user.action";
+import { Button } from "@/components/ui/button";
 
 export function SignInButton() {
   return (
@@ -8,7 +10,9 @@ export function SignInButton() {
         await signInWithGoogleAction();
       }}
     >
-      <button type="submit">Sign in with Google</button>
+      <Button type="submit" variant="outline">
+        <PizzaIcon /> Google
+      </Button>
     </form>
   );
 }

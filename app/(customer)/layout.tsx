@@ -1,8 +1,10 @@
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { badgeVariants } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { SignOutButton } from "@/components/utils/signout-button";
 import { requiredCurrentUser } from "@/features/user/user.action";
 import { ROUTES } from "@/types/routes";
-import Image from "next/image";
-import Link from "next/link";
 
 export default async function CustomerLayout({
   children,
@@ -12,30 +14,49 @@ export default async function CustomerLayout({
   const user = await requiredCurrentUser();
 
   return (
-    <section className="grid gap-y-4">
-      <div className="flex gap-x-2">
-        <h1>Bienvenue {user.name}</h1>
-        {user.image && (
-          <Image src={user.image} width={25} height={25} alt="User Avatar" />
-        )}
-        <SignOutButton />
+    <main>
+      <header className="flex justify-between items-center p-4">
+        <Link
+          href={ROUTES.DASHBOARD}
+          className={badgeVariants({ variant: "outline" })}
+        >
+          Trya
+        </Link>
+        <div className="flex gap-x-2">
+          {user.image && (
+            <Avatar>
+              <AvatarImage src={user.image} />
+              <AvatarFallback>
+                {user.name?.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          <SignOutButton />
+        </div>
+      </header>
+      <div className="flex">
+        <nav className="basis-1/5 p-4">
+          <ul className="grid gap-y-3">
+            <li>
+              <Link
+                href={ROUTES.ACCOUNTS}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Comptes
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={ROUTES.FINANCIAL}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Revenus & Dépenses
+              </Link>
+            </li>
+          </ul>
+        </nav>
+        <div className="basis-4/5 p-4">{children}</div>
       </div>
-
-      <nav>
-        <ul className="flex gap-x-2">
-          <li className="border p-1 rounded-xs">
-            <Link href={ROUTES.DASHBOARD}>Trya Logo</Link>
-          </li>
-          <li className="border p-1 rounded-xs">
-            <Link href={ROUTES.ACCOUNTS}>Comptes</Link>
-          </li>
-          <li className="border p-1 rounded-xs">
-            <Link href={ROUTES.FINANCIAL}>Revenus & Dépenses</Link>
-          </li>
-        </ul>
-      </nav>
-
-      {children}
-    </section>
+    </main>
   );
 }

@@ -1,6 +1,6 @@
+import { redirect } from "next/navigation";
 import { currentUser } from "@/features/user/user.action";
 import { ROUTES } from "@/types/routes";
-import { redirect } from "next/navigation";
 
 export default async function AuthLayout({
   children,
@@ -11,5 +11,5 @@ export default async function AuthLayout({
 
   if (user) redirect(ROUTES.DASHBOARD);
 
-  return <section>{children}</section>;
+  return <main>{children}</main>;
 }

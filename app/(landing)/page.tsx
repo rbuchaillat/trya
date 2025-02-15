@@ -1,15 +1,7 @@
-import { ROUTES } from "@/types/routes";
-import Link from "next/link";
-
-export default async function Home() {
+export default function Home() {
   return (
-    <main>
-      <nav>
-        <Link href={ROUTES.SIGNIN}>Mon compte</Link>
-      </nav>
-      <section>
-        <h1>Trya App</h1>
-      </section>
-    </main>
+    <section className="flex justify-center items-center h-60">
+      <h1 className="underline">Trya App</h1>
+    </section>
   );
 }

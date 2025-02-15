@@ -1,27 +1,18 @@
-import { getTransactionsByAccountId } from "@/features/bridge/bridge.action";
+import { AccountInfo } from "./_components/account-info";
+import { TransactionsList } from "./_components/transactions-list";
 
-export default async function Page({
+export default async function Account({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
-  const { data: transactions } =
-    (await getTransactionsByAccountId({ id: +id })) ?? {};
 
   return (
-    <div>
-      {transactions?.resources.map((transaction) => {
-        return (
-          <div key={transaction.id} className="flex justify-between">
-            <div>{transaction.clean_description}</div>
-            <div>
-              {transaction.amount}
-              {transaction.currency_code}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <section className="grid gap-y-5 bg-slate-100 rounded-2xl p-4">
+      <h1>Transactions</h1>
+      <AccountInfo id={+id} />
+      <TransactionsList accountId={+id} />
+    </section>
   );
 }

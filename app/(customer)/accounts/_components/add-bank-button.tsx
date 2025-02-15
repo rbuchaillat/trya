@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { requiredCurrentUser } from "@/features/user/user.action";
 import {
   createUser,
   createConnectSession,
 } from "@/features/bridge/bridge.action";
-import { requiredCurrentUser } from "@/features/user/user.action";
+import { Button } from "@/components/ui/button";
 
 export const AddBankButton = () => {
-  const [bridgeUrl, setBridgeUrl] = useState<string | null>(null);
+  const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,7 +18,7 @@ export const AddBankButton = () => {
         const user = await requiredCurrentUser();
         if (!user?.isCreatedOnBridge) await createUser();
         const item = await createConnectSession();
-        if (item?.data?.url) setBridgeUrl(item.data.url);
+        if (item?.data?.url) setUrl(item.data.url);
       } catch (err) {
         console.error(err);
       } finally {
@@ -31,13 +32,13 @@ export const AddBankButton = () => {
     return <p>Chargement...</p>;
   }
 
-  if (!bridgeUrl) {
+  if (!url) {
     return null;
   }
 
   return (
-    <button onClick={() => (window.location.href = bridgeUrl)}>
+    <Button onClick={() => (window.location.href = url)} variant="default">
       Ajouter une banque
-    </button>
+    </Button>
   );
 };

@@ -1,4 +1,5 @@
 import { signOutAction } from "@/features/user/user.action";
+import { Button } from "@/components/ui/button";
 
 export function SignOutButton() {
   return (
@@ -8,7 +9,9 @@ export function SignOutButton() {
         await signOutAction();
       }}
     >
-      <button type="submit">Sign Out</button>
+      <Button type="submit" variant="link">
+        Se déconnecter
+      </Button>
     </form>
   );
 }
