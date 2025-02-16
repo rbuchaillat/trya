@@ -35,7 +35,7 @@ export default async function CustomerLayout({
         </div>
       </header>
       <div className="flex">
-        <nav className="basis-1/5 p-4">
+        <nav className="basis-1/6 p-4">
           <ul className="grid gap-y-3">
             <li>
               <Link
@@ -55,7 +55,7 @@ export default async function CustomerLayout({
             </li>
           </ul>
         </nav>
-        <div className="basis-4/5 p-4">{children}</div>
+        <div className="basis-5/6 p-4">{children}</div>
       </div>
     </main>
   );

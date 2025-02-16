@@ -8,18 +8,19 @@ datasource db {
 }
 
 model User {
-  id                String    @id @default(cuid())
-  name              String?
-  email             String    @unique
-  emailVerified     DateTime?
-  image             String?
-  isCreatedOnBridge Boolean   @default(false)
-  accounts          Account[]
-  sessions          Session[]
+  id            String       @id @default(cuid())
+  name          String?
+  email         String       @unique
+  emailVerified DateTime?
+  image         String?
+  bridgeId      String?      @unique
+  bridgeToken   BridgeToken?
+  accounts      Account[]
+  sessions      Session[]
+  items         Item[]
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  UserToken UserToken[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Account {
@@ -61,10 +62,74 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
-model UserToken {
-  id           Int      @id @default(autoincrement())
-  userId       String
+model BridgeToken {
+  id           Int    @id @default(autoincrement())
+  userId       String @unique
   access_token String
-  expires_at   DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expires_at DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Item {
+  id                      BigInt        @id
+  userId                  String
+  provider_id             Int
+  provider_name           String?
+  provider_group_name     String?
+  provider_images_logo    String?
+  status                  Int
+  status_code_info        String?
+  status_code_description String?
+  account_types           String
+  bankAccounts            BankAccount[]
+
+  user User @relation(fields: [userId], references: [bridgeId], onDelete: Cascade)
+
+  last_successful_refresh DateTime?
+  last_try_refresh        DateTime?
+  created_at              DateTime
+}
+
+model BankAccount {
+  id                  BigInt        @id
+  name                String
+  balance             Float
+  accounting_balance  Float?
+  instant_balance     Float?
+  updated_at          DateTime
+  last_refresh_status String?
+  type                String
+  currency_code       String
+  item_id             BigInt
+  provider_id         Int
+  loan_details        Json?
+  pro                 Boolean?
+  data_access         String?
+  iban                String?
+  transaction         Transaction[]
+
+  item Item @relation(fields: [item_id], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id                   BigInt   @id
+  clean_description    String
+  provider_description String
+  amount               Float
+  currency_code        String
+  deleted              Boolean?
+  category_id          Int?
+  operation_type       String
+  account_id           BigInt
+  future               Boolean?
+
+  date             String?
+  booking_date     String?
+  transaction_date String?
+  value_date       String?
+  updated_at       DateTime
+
+  bankAccount BankAccount @relation(fields: [account_id], references: [id], onDelete: Cascade)
 }

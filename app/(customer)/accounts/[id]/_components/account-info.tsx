@@ -4,9 +4,7 @@ import { cn } from "@/lib/utils";
 export const AccountInfo = async (props: { id: number }) => {
   const { id } = props;
 
-  const accountResponse = await getAccount({
-    id,
-  });
+  const accountResponse = await getAccount({ id });
   const account = accountResponse?.data;
 
   if (!account) return null;

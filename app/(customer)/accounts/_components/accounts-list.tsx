@@ -1,12 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  getAccountsByItemId,
-  getItems,
-  getProviderById,
-} from "@/features/bridge/bridge.action";
-import { ROUTES } from "@/types/routes";
+import { getAccountsByItemId, getItems } from "@/features/bridge/bridge.action";
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/types/routes";
 
 export const AccountsList = async () => {
   const itemsResponse = await getItems();
@@ -16,13 +12,10 @@ export const AccountsList = async () => {
 
   return (
     <div className="grid gap-y-3">
-      {items.resources.map(async (item) => {
-        const providerResponse = await getProviderById({
-          id: item.provider_id,
+      {items.map(async (item) => {
+        const accountsResponse = await getAccountsByItemId({
+          id: item.id.toString(),
         });
-        const provider = providerResponse?.data;
-
-        const accountsResponse = await getAccountsByItemId({ id: item.id });
         const accounts = accountsResponse?.data;
 
         return (
@@ -30,22 +23,24 @@ export const AccountsList = async () => {
             key={item.id}
             className="bg-white p-3 rounded-xl shadow-md grid gap-y-3"
           >
-            {provider && (
+            {(item.provider_group_name || item.provider_name) && (
               <div className="flex items-center gap-x-0.5">
-                {provider.images && (
+                {item.provider_images_logo && (
                   <Image
-                    src={provider.images.logo}
-                    width={36}
-                    height={36}
-                    alt={`${provider.group_name ?? provider.name} logo`}
+                    src={item.provider_images_logo}
+                    width={24}
+                    height={24}
+                    alt={`${
+                      item.provider_group_name ?? item.provider_name
+                    } logo`}
                   />
                 )}
-                <p>{provider.group_name ?? provider.name}</p>
+                <p>{item.provider_group_name ?? item.provider_name}</p>
               </div>
             )}
             {accounts && (
               <div className="grid gap-y-2">
-                {accounts.resources.map((account) => {
+                {accounts.map((account) => {
                   return (
                     <div key={account.id}>
                       <Link href={`${ROUTES.ACCOUNTS}/${account.id}`}>

@@ -16,7 +16,7 @@ export const AddBankButton = () => {
     const initToBridge = async () => {
       try {
         const user = await requiredCurrentUser();
-        if (!user?.isCreatedOnBridge) await createUser();
+        if (!user.bridgeId) await createUser();
         const item = await createConnectSession();
         if (item?.data?.url) setUrl(item.data.url);
       } catch (err) {

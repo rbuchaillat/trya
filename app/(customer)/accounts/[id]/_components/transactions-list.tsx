@@ -23,23 +23,31 @@ export const TransactionsList = async (props: { accountId: number }) => {
         </tr>
       </thead>
       <tbody>
-        {transactions.resources.map((transaction) => {
-          return (
-            <tr key={transaction.id} className="h-10 border-b border-gray-100">
-              <td className="text-center px-5">{transaction.date}</td>
-              <td className="text-center">{transaction.operation_type}</td>
-              <td className="px-2.5">{transaction.clean_description}</td>
-              <td
-                className={cn("text-right px-2.5", {
-                  "text-emerald-400": transaction.amount > 0,
-                })}
+        {transactions
+          .sort(
+            (a, b) =>
+              new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
+          )
+          .map((transaction) => {
+            return (
+              <tr
+                key={transaction.id}
+                className="h-10 border-b border-gray-100"
               >
-                {transaction.amount} €
-              </td>
-              <td className="px-2.5">{transaction.category_id}</td>
-            </tr>
-          );
-        })}
+                <td className="text-center px-5">{transaction.date}</td>
+                <td className="text-center">{transaction.operation_type}</td>
+                <td className="px-2.5">{transaction.clean_description}</td>
+                <td
+                  className={cn("text-right px-2.5", {
+                    "text-emerald-400": transaction.amount > 0,
+                  })}
+                >
+                  {transaction.amount} €
+                </td>
+                <td className="px-2.5">{transaction.category_id}</td>
+              </tr>
+            );
+          })}
       </tbody>
     </table>
   );

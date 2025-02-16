@@ -17,18 +17,23 @@ export type CreateConnectSessionResponse = {
   url: string;
 };
 
+export type ItemResponse = {
+  id: number;
+  status: number;
+  status_code_info?: string;
+  status_code_description?: string;
+  provider_id: number;
+  provider_name?: string;
+  provider_group_name?: string;
+  provider_images_logo?: string;
+  account_types: string;
+  last_successful_refresh?: string;
+  last_try_refresh?: string;
+  created_at: string;
+};
+
 export type ItemsResponse = {
-  resources: {
-    id: number;
-    status: number;
-    status_code_info: string;
-    status_code_description: string;
-    provider_id: number;
-    account_types: string;
-    last_successful_refresh: string;
-    last_try_refresh: string;
-    created_at: string;
-  }[];
+  resources: ItemResponse[];
   generated_at: string;
   pagination: {
     next_uri: string | null;
@@ -70,35 +75,36 @@ export type ProviderResponse = {
   };
 };
 
-export type AccountResponse = {
+export type BankAccountResponse = {
   id: number;
   name: string;
   balance: number;
-  accounting_balance: number;
-  instant_balance: number;
+  accounting_balance?: number;
+  instant_balance?: number;
   updated_at: string;
+  last_refresh_status?: string;
   type: string;
   currency_code: string;
   item_id: number;
   provider_id: number;
   loan_details?: {
-    next_payment_date: string;
-    next_payment_amount: number;
-    maturity_date: string;
-    opening_date: string;
-    interest_rate: number;
-    type: string;
-    borrowed_capital: number;
-    repaid_capital: number;
-    remaining_capital: number;
+    next_payment_date?: string;
+    next_payment_amount?: number;
+    maturity_date?: string;
+    opening_date?: string;
+    interest_rate?: number;
+    type?: string;
+    borrowed_capital?: number;
+    repaid_capital?: number;
+    remaining_capital?: number;
   };
-  pro: string;
-  data_access: string;
-  iban: string;
+  pro?: boolean;
+  data_access?: string;
+  iban?: string;
 };
 
-export type AccountsResponse = {
-  resources: AccountResponse[];
+export type BankAccountsResponse = {
+  resources: BankAccountResponse[];
   generated_at: string;
   pagination: {
     next_uri: string | null;
@@ -110,17 +116,17 @@ export type TransactionResponse = {
   clean_description: string;
   provider_description: string;
   amount: number;
-  date: string;
-  booking_date: string;
-  transaction_date: string;
-  value_date: string;
+  date?: string;
+  booking_date?: string;
+  transaction_date?: string;
+  value_date?: string;
   updated_at: string;
   currency_code: string;
-  deleted: string;
-  category_id: number;
+  deleted?: boolean;
+  category_id?: number;
   operation_type: string;
   account_id: number;
-  future: string;
+  future?: boolean;
 };
 
 export type TransactionsResponse = {

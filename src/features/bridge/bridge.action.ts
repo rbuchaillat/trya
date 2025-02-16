@@ -8,14 +8,9 @@ import {
   authActionClientWithAccessToken,
 } from "@/lib/safe-action";
 import {
-  AccountResponse,
-  AccountsResponse,
   AuthorizationTokenResponse,
   CreateConnectSessionResponse,
   CreateUserResponse,
-  ItemsResponse,
-  ProviderResponse,
-  TransactionsResponse,
 } from "./bridge.types";
 
 const defaultHeaders = {
@@ -24,6 +19,11 @@ const defaultHeaders = {
   "Client-Id": process.env.BRIDGE_CLIENT_ID!,
   "Client-Secret": process.env.BRIDGE_CLIENT_SECRET!,
 };
+
+/*
+  The following functions link a user to Bridge, enabling the retrieval of an access token
+  and a URL to connect their bank accounts.
+*/
 
 export const createUser = authActionClient.action(async ({ ctx: { user } }) => {
   const response = await fetch(
@@ -52,7 +52,7 @@ export const createUser = authActionClient.action(async ({ ctx: { user } }) => {
 
   await prisma.user.update({
     data: {
-      isCreatedOnBridge: true,
+      bridgeId: data.uuid,
     },
     where: {
       id: user.id,
@@ -123,184 +123,16 @@ export const createConnectSession = authActionClientWithAccessToken.action(
   }
 );
 
-export const getItems = authActionClientWithAccessToken.action(
-  async ({ ctx: { accessToken } }) => {
-    const response = await fetch(
-      "https://api.bridgeapi.io/v3/aggregation/items",
-      {
-        headers: {
-          ...defaultHeaders,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
-
-    const data: ItemsResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error getting items");
-    }
-
-    return data;
-  }
-);
-
-export const getProviderById = authActionClientWithAccessToken
-  .schema(
-    z.object({
-      id: z.number(),
-    })
-  )
-  .action(async ({ parsedInput: { id }, ctx: { accessToken } }) => {
-    const response = await fetch(
-      `https://api.bridgeapi.io/v3/providers/${id}`,
-      {
-        headers: {
-          ...defaultHeaders,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
-
-    const data: ProviderResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error getting provider");
-    }
-
-    return data;
-  });
-
-export const getAccountsByItemId = authActionClientWithAccessToken
-  .schema(
-    z.object({
-      id: z.number(),
-    })
-  )
-  .action(async ({ parsedInput: { id }, ctx: { accessToken } }) => {
-    const response = await fetch(
-      `https://api.bridgeapi.io/v3/aggregation/accounts?item_id=${id}`,
-      {
-        headers: {
-          ...defaultHeaders,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
-
-    const data: AccountsResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error getting accounts");
-    }
-
-    return data;
-  });
-
-export const getAccount = authActionClientWithAccessToken
-  .schema(
-    z.object({
-      id: z.number(),
-    })
-  )
-  .action(async ({ parsedInput: { id }, ctx: { accessToken } }) => {
-    const response = await fetch(
-      `https://api.bridgeapi.io/v3/aggregation/accounts/${id}`,
-      {
-        headers: {
-          ...defaultHeaders,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
-
-    const data: AccountResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error getting account");
-    }
-
-    return data;
-  });
-
-export const getTransactions = authActionClientWithAccessToken.action(
-  async ({ ctx: { accessToken } }) => {
-    const response = await fetch(
-      "https://api.bridgeapi.io/v3/aggregation/transactions",
-      {
-        headers: {
-          ...defaultHeaders,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
-
-    const data: TransactionsResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error getting transactions");
-    }
-
-    return data;
-  }
-);
-
-export const getTransactionsByAccountId = authActionClientWithAccessToken
-  .schema(
-    z.object({
-      id: z.number(),
-    })
-  )
-  .action(async ({ parsedInput: { id }, ctx: { accessToken } }) => {
-    const response = await fetch(
-      `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${id}`,
-      {
-        headers: {
-          ...defaultHeaders,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
-
-    const data: TransactionsResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error getting transaction");
-    }
-
-    return data;
-  });
+/*
+  These functions manage the lifecycle of the access token.
+*/
 
 export const storeAccessToken = authActionClient.action(
   async ({ ctx: { user } }) => {
     const { data } = (await authorizationToken()) ?? {};
 
     if (data) {
-      await prisma.userToken.create({
+      await prisma.bridgeToken.create({
         data: {
           access_token: data.access_token,
           expires_at: data.expires_at,
@@ -323,7 +155,7 @@ export const refreshAccessToken = actionClient
     const { data } = (await authorizationToken()) ?? {};
 
     if (data) {
-      await prisma.userToken.update({
+      await prisma.bridgeToken.update({
         data: {
           access_token: data.access_token,
           expires_at: data.expires_at,
@@ -335,4 +167,69 @@ export const refreshAccessToken = actionClient
     }
 
     return data;
+  });
+
+/*
+  These functions retrieve the stored Bridge data from the database.
+*/
+
+export const getItems = authActionClient.action(async ({ ctx: { user } }) => {
+  const _user = await prisma.user.findUnique({
+    where: {
+      id: user.id,
+    },
+    include: {
+      items: true,
+    },
+  });
+
+  return _user?.items;
+});
+
+export const getAccountsByItemId = actionClient
+  .schema(
+    z.object({
+      id: z.string(),
+    })
+  )
+  .action(async ({ parsedInput: { id } }) => {
+    const accounts = await prisma.bankAccount.findMany({
+      where: {
+        item_id: +id,
+      },
+    });
+
+    return accounts;
+  });
+
+export const getAccount = actionClient
+  .schema(
+    z.object({
+      id: z.number(),
+    })
+  )
+  .action(async ({ parsedInput: { id } }) => {
+    const account = await prisma.bankAccount.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return account;
+  });
+
+export const getTransactionsByAccountId = actionClient
+  .schema(
+    z.object({
+      id: z.number(),
+    })
+  )
+  .action(async ({ parsedInput: { id } }) => {
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        account_id: id,
+      },
+    });
+
+    return transactions;
   });
