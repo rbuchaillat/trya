@@ -1,15 +1,15 @@
 import { CategoryChip } from "@/components/utils/category-chip";
-import { getTransactionsByAccountId } from "@/features/bridge/bridge.action";
+import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { formatDateWithShortMonth } from "@/utils/date";
 
 export const TransactionsList = async (props: { accountId: number }) => {
   const { accountId } = props;
 
-  const transactionsResponse = await getTransactionsByAccountId({
-    id: accountId,
+  const transactions = await prisma.transaction.findMany({
+    where: { account_id: accountId },
+    include: { category: true },
   });
-  const transactions = transactionsResponse?.data;
 
   if (!transactions) return null;
 

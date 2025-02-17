@@ -20,11 +20,6 @@ const defaultHeaders = {
   "Client-Secret": process.env.BRIDGE_CLIENT_SECRET!,
 };
 
-/*
-  The following functions link a user to Bridge, enabling the retrieval of an access token
-  and a URL to connect their bank accounts.
-*/
-
 export const createUser = authActionClient.action(async ({ ctx: { user } }) => {
   const response = await fetch(
     "https://api.bridgeapi.io/v3/aggregation/users",
@@ -142,42 +137,4 @@ export const refreshAccessToken = actionClient
     }
 
     return data;
-  });
-
-/*
-  These functions retrieve the stored Bridge data from the database.
-*/
-
-export const getItems = authActionClient.action(async ({ ctx: { user } }) => {
-  const _user = await prisma.user.findUnique({
-    where: { id: user.id },
-    include: { items: true },
-  });
-  return _user?.items;
-});
-
-export const getAccountsByItemId = actionClient
-  .schema(z.object({ id: z.string() }))
-  .action(async ({ parsedInput: { id } }) => {
-    const accounts = await prisma.bankAccount.findMany({
-      where: { item_id: +id },
-    });
-    return accounts;
-  });
-
-export const getAccount = actionClient
-  .schema(z.object({ id: z.number() }))
-  .action(async ({ parsedInput: { id } }) => {
-    const account = await prisma.bankAccount.findUnique({ where: { id } });
-    return account;
-  });
-
-export const getTransactionsByAccountId = actionClient
-  .schema(z.object({ id: z.number() }))
-  .action(async ({ parsedInput: { id } }) => {
-    const transactions = await prisma.transaction.findMany({
-      where: { account_id: id },
-      include: { category: true },
-    });
-    return transactions;
   });

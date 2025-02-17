@@ -1,22 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getAccountsByItemId, getItems } from "@/features/bridge/bridge.action";
+import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/types/routes";
+import { requiredCurrentUser } from "@/features/user/user.action";
 
 export const AccountsList = async () => {
-  const itemsResponse = await getItems();
-  const items = itemsResponse?.data;
+  const user = await requiredCurrentUser();
+
+  if (!user.bridgeId) return null;
+
+  const items = await prisma.item.findMany({
+    where: { userId: user.bridgeId },
+  });
 
   if (!items) return null;
 
   return (
     <div className="grid gap-y-3">
       {items.map(async (item) => {
-        const accountsResponse = await getAccountsByItemId({
-          id: item.id.toString(),
+        const accounts = await prisma.bankAccount.findMany({
+          where: { item_id: +item.id.toString() },
         });
-        const accounts = accountsResponse?.data;
 
         return (
           <div

@@ -1,11 +1,10 @@
-import { getAccount } from "@/features/bridge/bridge.action";
+import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 
 export const AccountInfo = async (props: { id: number }) => {
   const { id } = props;
 
-  const accountResponse = await getAccount({ id });
-  const account = accountResponse?.data;
+  const account = await prisma.bankAccount.findUnique({ where: { id } });
 
   if (!account) return null;
 

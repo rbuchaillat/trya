@@ -2,10 +2,10 @@
 
 import { XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 import { Category, CategoryGroup } from "@prisma/client";
+import { cn } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
 import { removeTransitionCategory } from "@/features/transaction/transaction.action";
-import { getCategoryGroupsWithCategories } from "@/features/category/category.action";
 import { COLORS } from "@/features/category/category.constant";
 import { CategoryCommand } from "./category-command";
 
@@ -71,7 +71,11 @@ const AddCategoryButton = ({ transactionId }: { transactionId: number }) => {
   useEffect(() => {
     if (open) {
       const fetchData = async () => {
-        const categoryGroups = await getCategoryGroupsWithCategories();
+        const categoryGroups = await prisma.categoryGroup.findMany({
+          include: {
+            categories: true,
+          },
+        });
         setCategoryGroups(categoryGroups);
       };
       fetchData();
