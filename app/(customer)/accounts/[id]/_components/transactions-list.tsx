@@ -57,7 +57,7 @@ export const TransactionsList = async (props: { accountId: number }) => {
                 <td className="px-2.5">
                   <CategoryChip
                     label={transaction.category?.name}
-                    id={+transaction.id.toString()}
+                    transactionId={+transaction.id.toString()}
                   />
                 </td>
               </tr>

@@ -6,7 +6,7 @@ import {
   ProviderResponse,
   TransactionsResponse,
 } from "@/features/bridge/bridge.types";
-import { classifyTransactionsByCategory } from "@/features/category/category.action";
+import { classifyTransactionsByCategory } from "@/features/transaction/transaction.action";
 
 export async function POST(request: NextRequest) {
   try {
