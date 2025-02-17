@@ -30,13 +30,8 @@ export const createUser = authActionClient.action(async ({ ctx: { user } }) => {
     "https://api.bridgeapi.io/v3/aggregation/users",
     {
       method: "POST",
-      headers: {
-        ...defaultHeaders,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        external_user_id: user.id,
-      }),
+      headers: { ...defaultHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify({ external_user_id: user.id }),
     }
   );
 
@@ -51,12 +46,8 @@ export const createUser = authActionClient.action(async ({ ctx: { user } }) => {
   }
 
   await prisma.user.update({
-    data: {
-      bridgeId: data.uuid,
-    },
-    where: {
-      id: user.id,
-    },
+    data: { bridgeId: data.uuid },
+    where: { id: user.id },
   });
 
   return data;
@@ -68,13 +59,8 @@ export const authorizationToken = authActionClient.action(
       "https://api.bridgeapi.io/v3/aggregation/authorization/token",
       {
         method: "POST",
-        headers: {
-          ...defaultHeaders,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          external_user_id: user.id,
-        }),
+        headers: { ...defaultHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({ external_user_id: user.id }),
       }
     );
 
@@ -103,9 +89,7 @@ export const createConnectSession = authActionClientWithAccessToken.action(
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          user_email: user.email,
-        }),
+        body: JSON.stringify({ user_email: user.email }),
       }
     );
 
@@ -146,23 +130,14 @@ export const storeAccessToken = authActionClient.action(
 );
 
 export const refreshAccessToken = actionClient
-  .schema(
-    z.object({
-      userTokenId: z.number(),
-    })
-  )
+  .schema(z.object({ userTokenId: z.number() }))
   .action(async ({ parsedInput: { userTokenId } }) => {
     const { data } = (await authorizationToken()) ?? {};
 
     if (data) {
       await prisma.bridgeToken.update({
-        data: {
-          access_token: data.access_token,
-          expires_at: data.expires_at,
-        },
-        where: {
-          id: userTokenId,
-        },
+        data: { access_token: data.access_token, expires_at: data.expires_at },
+        where: { id: userTokenId },
       });
     }
 
@@ -175,64 +150,34 @@ export const refreshAccessToken = actionClient
 
 export const getItems = authActionClient.action(async ({ ctx: { user } }) => {
   const _user = await prisma.user.findUnique({
-    where: {
-      id: user.id,
-    },
-    include: {
-      items: true,
-    },
+    where: { id: user.id },
+    include: { items: true },
   });
-
   return _user?.items;
 });
 
 export const getAccountsByItemId = actionClient
-  .schema(
-    z.object({
-      id: z.string(),
-    })
-  )
+  .schema(z.object({ id: z.string() }))
   .action(async ({ parsedInput: { id } }) => {
     const accounts = await prisma.bankAccount.findMany({
-      where: {
-        item_id: +id,
-      },
+      where: { item_id: +id },
     });
-
     return accounts;
   });
 
 export const getAccount = actionClient
-  .schema(
-    z.object({
-      id: z.number(),
-    })
-  )
+  .schema(z.object({ id: z.number() }))
   .action(async ({ parsedInput: { id } }) => {
-    const account = await prisma.bankAccount.findUnique({
-      where: {
-        id,
-      },
-    });
-
+    const account = await prisma.bankAccount.findUnique({ where: { id } });
     return account;
   });
 
 export const getTransactionsByAccountId = actionClient
-  .schema(
-    z.object({
-      id: z.number(),
-    })
-  )
+  .schema(z.object({ id: z.number() }))
   .action(async ({ parsedInput: { id } }) => {
     const transactions = await prisma.transaction.findMany({
-      where: {
-        account_id: id,
-      },
-      include: {
-        category: true,
-      },
+      where: { account_id: id },
+      include: { category: true },
     });
-
     return transactions;
   });

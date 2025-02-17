@@ -4,6 +4,20 @@ import { openai } from "@/lib/openai";
 import { prisma } from "@/lib/prisma";
 import { TransactionResponse } from "@/features/bridge/bridge.types";
 
+export const addTransitionCategory = async (id: number, categoryId: number) => {
+  await prisma.transaction.update({
+    where: { id },
+    data: { categoryId },
+  });
+};
+
+export const removeTransitionCategory = async (id: number) => {
+  await prisma.transaction.update({
+    where: { id },
+    data: { categoryId: null },
+  });
+};
+
 export const classifyTransactionsByCategory = async (
   transactions: TransactionResponse[]
 ) => {
@@ -30,7 +44,7 @@ export const classifyTransactionsByCategory = async (
       },
     ],
     model: "gpt-3.5-turbo",
-    //   model: "gpt-4-turbo",
+    // model: "gpt-4-turbo",
   });
 
   const openaiResponse =

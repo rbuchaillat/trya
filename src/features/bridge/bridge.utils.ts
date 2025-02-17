@@ -2,9 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { refreshAccessToken, storeAccessToken } from "./bridge.action";
 
 export const getAccessToken = async (userId: string) => {
-  const userToken = await prisma.bridgeToken.findFirst({
-    where: { userId },
-  });
+  const userToken = await prisma.bridgeToken.findFirst({ where: { userId } });
 
   if (!userToken) {
     const response = await storeAccessToken();

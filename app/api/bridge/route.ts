@@ -6,7 +6,7 @@ import {
   ProviderResponse,
   TransactionsResponse,
 } from "@/features/bridge/bridge.types";
-import { classifyTransactionsByCategory } from "@/features/openai/openai.action";
+import { classifyTransactionsByCategory } from "@/features/category/category.action";
 
 export async function POST(request: NextRequest) {
   try {
@@ -158,12 +158,8 @@ export async function POST(request: NextRequest) {
         try {
           if (data.content.data_access === "enabled") {
             const bankAccountUpdated = await prisma.bankAccount.update({
-              data: {
-                balance: data.content.balance,
-              },
-              where: {
-                id: data.content.account_id,
-              },
+              data: { balance: data.content.balance },
+              where: { id: data.content.account_id },
             });
 
             const since = bankAccountUpdated.updated_at.toISOString();
@@ -187,12 +183,8 @@ export async function POST(request: NextRequest) {
                 skipDuplicates: true,
               }),
               prisma.bankAccount.update({
-                data: {
-                  updated_at: new Date(),
-                },
-                where: {
-                  id: data.content.account_id,
-                },
+                data: { updated_at: new Date() },
+                where: { id: data.content.account_id },
               }),
             ]);
 

@@ -14,7 +14,7 @@ export default async function CustomerLayout({
   const user = await requiredCurrentUser();
 
   return (
-    <main>
+    <main className="text-slate-600">
       <header className="flex justify-between items-center p-4">
         <Link
           href={ROUTES.DASHBOARD}
