@@ -6,6 +6,7 @@ import {
   ProviderResponse,
   TransactionsResponse,
 } from "@/features/bridge/bridge.types";
+import { classifyTransactionsByCategory } from "@/features/openai/openai.action";
 
 export async function POST(request: NextRequest) {
   try {
@@ -124,6 +125,29 @@ export async function POST(request: NextRequest) {
             data: transactions.resources,
             skipDuplicates: true,
           });
+
+          const transactionsByCategory = await classifyTransactionsByCategory(
+            transactions.resources
+          );
+
+          const updateQuery = transactionsByCategory
+            .map(({ transactionId, categoryId }) => {
+              return `WHEN id = ${transactionId} THEN ${categoryId}`;
+            })
+            .join(" ");
+
+          const query = `
+            UPDATE "Transaction"
+            SET "categoryId" = CASE
+              ${updateQuery}
+              ELSE "categoryId"
+            END
+            WHERE "id" IN (${transactionsByCategory
+              .map((pair) => pair.transactionId)
+              .join(", ")})
+          `;
+
+          await prisma.$executeRawUnsafe(query);
         } catch (error) {
           console.error("Error during API call or database operation:", error);
         }
@@ -171,6 +195,29 @@ export async function POST(request: NextRequest) {
                 },
               }),
             ]);
+
+            const transactionsByCategory = await classifyTransactionsByCategory(
+              transactions.resources
+            );
+
+            const updateQuery = transactionsByCategory
+              .map(({ transactionId, categoryId }) => {
+                return `WHEN id = ${transactionId} THEN ${categoryId}`;
+              })
+              .join(" ");
+
+            const query = `
+              UPDATE "Transaction"
+              SET "categoryId" = CASE
+                ${updateQuery}
+                ELSE "categoryId"
+              END
+              WHERE "id" IN (${transactionsByCategory
+                .map((pair) => pair.transactionId)
+                .join(", ")})
+            `;
+
+            await prisma.$executeRawUnsafe(query);
           } else {
             const account = await prisma.bankAccount.findUnique({
               where: { id: data.content.account_id },

@@ -28,8 +28,8 @@ export const AccountsList = async () => {
                 {item.provider_images_logo && (
                   <Image
                     src={item.provider_images_logo}
-                    width={24}
-                    height={24}
+                    width={36}
+                    height={36}
                     alt={`${
                       item.provider_group_name ?? item.provider_name
                     } logo`}

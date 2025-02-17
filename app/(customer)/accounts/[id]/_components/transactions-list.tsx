@@ -1,5 +1,7 @@
+import { Chip } from "@/components/ui/chip";
 import { getTransactionsByAccountId } from "@/features/bridge/bridge.action";
 import { cn } from "@/lib/utils";
+import { formatDateWithShortMonth } from "@/utils/date";
 
 export const TransactionsList = async (props: { accountId: number }) => {
   const { accountId } = props;
@@ -29,12 +31,20 @@ export const TransactionsList = async (props: { accountId: number }) => {
               new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
           )
           .map((transaction) => {
+            const date = new Date(transaction.date ?? 0);
             return (
               <tr
                 key={transaction.id}
                 className="h-10 border-b border-gray-100"
               >
-                <td className="text-center px-5">{transaction.date}</td>
+                <td className="text-center px-5">
+                  <div className="text-sm">
+                    {formatDateWithShortMonth(date)}
+                  </div>
+                  {date.getFullYear() !== new Date().getFullYear() && (
+                    <div className="text-xs">{date.getFullYear()}</div>
+                  )}
+                </td>
                 <td className="text-center">{transaction.operation_type}</td>
                 <td className="px-2.5">{transaction.clean_description}</td>
                 <td
@@ -44,7 +54,11 @@ export const TransactionsList = async (props: { accountId: number }) => {
                 >
                   {transaction.amount} €
                 </td>
-                <td className="px-2.5">{transaction.category_id}</td>
+                <td className="px-2.5">
+                  {transaction.category?.name && (
+                    <Chip label={transaction.category.name} />
+                  )}
+                </td>
               </tr>
             );
           })}

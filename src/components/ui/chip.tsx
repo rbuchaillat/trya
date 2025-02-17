@@ -1,0 +1,105 @@
+import { cn } from "@/lib/utils";
+
+const colors: Record<string, string> = {
+  "Abonnements - Autres": "bg-pink-500",
+  Internet: "bg-pink-500",
+  "Téléphone mobile": "bg-pink-500",
+  Multimédia: "bg-pink-500",
+  "Achats & Shopping - Autres": "bg-green-500",
+  Cadeaux: "bg-green-500",
+  "High Tech": "bg-green-500",
+  Musique: "bg-green-500",
+  "Vêtements / Chaussures": "bg-green-500",
+  "Alimentation - Autres": "bg-amber-500",
+  Café: "bg-amber-500",
+  "Fast Foods": "bg-amber-500",
+  Restaurants: "bg-amber-500",
+  "Supermarché / Épicerie": "bg-amber-500",
+  "Assurance véhicule": "bg-yellow-500",
+  "Auto & Transports - Autres": "bg-yellow-500",
+  "Billets d'avion": "bg-yellow-500",
+  "Billets de train": "bg-yellow-500",
+  Carburant: "bg-yellow-500",
+  "Entretien véhicule": "bg-yellow-500",
+  "Location de véhicule": "bg-yellow-500",
+  Péage: "bg-yellow-500",
+  Stationnement: "bg-yellow-500",
+  "Transport en commun": "bg-yellow-500",
+  "Banque - Autres": "bg-red-500",
+  "Débit mensuel carte": "bg-red-500",
+  Epargne: "bg-red-500",
+  "Frais bancaires": "bg-red-500",
+  Hypothèque: "bg-red-500",
+  "Incidents de paiement": "bg-red-500",
+  "Remboursement emprunt": "bg-red-500",
+  "Services bancaires": "bg-red-500",
+  "A catégoriser": "bg-gray-500",
+  Assurance: "bg-gray-500",
+  "Autres dépenses": "bg-gray-500",
+  Dons: "bg-gray-500",
+  Pressing: "bg-gray-500",
+  Tabac: "bg-gray-500",
+  Coiffeur: "bg-blue-500",
+  Cosmétique: "bg-blue-500",
+  Esthétique: "bg-blue-500",
+  "Esthétique & Soins - Autres": "bg-blue-500",
+  "Spa & Massage": "bg-blue-500",
+  Amendes: "bg-teal-500",
+  "Impôts & Taxes - Autres": "bg-teal-500",
+  "Impôts fonciers": "bg-teal-500",
+  "Impôts sur le revenu": "bg-teal-500",
+  Taxes: "bg-teal-500",
+  "Assurance habitation": "bg-purple-500",
+  "Charges diverses": "bg-purple-500",
+  Décoration: "bg-purple-500",
+  Eau: "bg-purple-500",
+  Electricité: "bg-purple-500",
+  Entretien: "bg-purple-500",
+  "Extérieur et jardin": "bg-purple-500",
+  Gaz: "bg-purple-500",
+  "Logement - Autres": "bg-purple-500",
+  Loyer: "bg-purple-500",
+  "Bars / Clubs": "bg-sky-500",
+  Divertissements: "bg-sky-500",
+  "Frais Animaux": "bg-sky-500",
+  Hobbies: "bg-sky-500",
+  Hôtels: "bg-sky-500",
+  "Loisirs & Sorties - Autres": "bg-sky-500",
+  Sport: "bg-sky-500",
+  "Voyages / Vacances": "bg-sky-500",
+  Chèques: "bg-lime-500",
+  Retraits: "bg-lime-500",
+  Virements: "bg-lime-500",
+  "Virements internes": "bg-lime-500",
+  Dentiste: "bg-emerald-500",
+  Médecin: "bg-emerald-500",
+  Mutuelle: "bg-emerald-500",
+  "Opticien / Ophtalmo.": "bg-emerald-500",
+  Pharmacie: "bg-emerald-500",
+  "Santé - Autres": "bg-emerald-500",
+  "Baby-sitters & Crèches": "bg-indigo-500",
+  Ecole: "bg-indigo-500",
+  "Fournitures scolaires": "bg-indigo-500",
+  Jouets: "bg-indigo-500",
+  "Logement étudiant": "bg-indigo-500",
+  Pensions: "bg-indigo-500",
+  "Prêt étudiant": "bg-indigo-500",
+  "Scolarité & Enfants - Autres": "bg-indigo-500",
+};
+
+export const Chip = ({ label }: { label: string }) => {
+  return (
+    <div className="max-w-44 w-fit shadow-[0_0_6px_#47638840] p-1 bg-white uppercase text-xs h-6 flex gap-x-1 items-center rounded-full">
+      <div
+        className={cn(
+          "size-4 rounded-full text-10 text-white flex items-center justify-center shrink-0 font-semibold",
+          colors[label]
+        )}
+      >
+        {label.charAt(0)}
+      </div>
+      <span className="line-clamp-1">{label}</span>
+      <div className="size-3.5" />
+    </div>
+  );
+};

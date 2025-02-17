@@ -120,10 +120,10 @@ model Transaction {
   amount               Float
   currency_code        String
   deleted              Boolean?
-  category_id          Int?
   operation_type       String
   account_id           BigInt
   future               Boolean?
+  categoryId           Int?
 
   date             String?
   booking_date     String?
@@ -132,4 +132,26 @@ model Transaction {
   updated_at       DateTime
 
   bankAccount BankAccount @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  category    Category?   @relation(fields: [categoryId], references: [id])
+}
+
+model CategoryGroup {
+  id         Int        @id @default(autoincrement())
+  name       String
+  categories Category[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id              Int           @id @default(autoincrement())
+  name            String
+  categoryGroupId Int
+  categoryGroup   CategoryGroup @relation(fields: [categoryGroupId], references: [id], onDelete: Cascade)
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

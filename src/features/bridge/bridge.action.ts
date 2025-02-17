@@ -229,6 +229,9 @@ export const getTransactionsByAccountId = actionClient
       where: {
         account_id: id,
       },
+      include: {
+        category: true,
+      },
     });
 
     return transactions;
