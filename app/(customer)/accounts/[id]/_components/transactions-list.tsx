@@ -1,4 +1,5 @@
 import { CategoryChip } from "@/components/utils/category-chip";
+import { requiredCurrentUser } from "@/features/user/user.action";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { formatDateWithShortMonth } from "@/utils/date";
@@ -6,10 +7,31 @@ import { formatDateWithShortMonth } from "@/utils/date";
 export const TransactionsList = async (props: { accountId: number }) => {
   const { accountId } = props;
 
-  const transactions = await prisma.transaction.findMany({
-    where: { account_id: accountId },
-    include: { category: true },
+  const user = await requiredCurrentUser();
+
+  const userWithTransactions = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: {
+      items: {
+        include: {
+          bankAccounts: {
+            where: { id: accountId },
+            include: {
+              transactions: {
+                include: {
+                  category: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
+
+  const transactions = userWithTransactions?.items.flatMap((item) =>
+    item.bankAccounts.flatMap((bankAccount) => bankAccount.transactions)
+  );
 
   if (!transactions) return null;
 

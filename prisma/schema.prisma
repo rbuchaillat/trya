@@ -108,7 +108,7 @@ model BankAccount {
   pro                 Boolean?
   data_access         String?
   iban                String?
-  transaction         Transaction[]
+  transactions        Transaction[]
 
   item Item @relation(fields: [item_id], references: [id], onDelete: Cascade)
 }

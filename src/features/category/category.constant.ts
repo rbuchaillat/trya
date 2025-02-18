@@ -1,3 +1,23 @@
+export const NEEDS_CATEGORIES = [
+  "Alimentation & Restaurant",
+  "Auto & Transports",
+  "Impôts & Taxes",
+  "Logement",
+  "Retraits, Chèques & Virements",
+  "Santé",
+  "Scolarité & Enfants",
+];
+
+export const SAVINGS_CATEGORIES = [""];
+
+export const WANTS_CATEGORIES = [
+  "Abonnements",
+  "Achats & Shopping",
+  "Divers",
+  "Esthétique & Soins",
+  "Loisirs & Sorties",
+];
+
 export const COLORS: Record<string, string> = {
   "Abonnements - Autres": "bg-orange-400",
   Internet: "bg-orange-400",

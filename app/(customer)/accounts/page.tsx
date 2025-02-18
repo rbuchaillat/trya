@@ -5,10 +5,10 @@ export default async function Accounts() {
   return (
     <section className="grid gap-y-5 bg-slate-100 rounded-2xl p-4">
       <h1>Mes comptes</h1>
+      <AccountsList />
       <div>
         <AddBankButton />
       </div>
-      <AccountsList />
     </section>
   );
 }

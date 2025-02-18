@@ -1,25 +1,43 @@
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
+import { requiredCurrentUser } from "@/features/user/user.action";
 
 export const AccountInfo = async (props: { id: number }) => {
   const { id } = props;
 
-  const account = await prisma.bankAccount.findUnique({ where: { id } });
+  const user = await requiredCurrentUser();
 
-  if (!account) return null;
+  const userWithBankAccount = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: {
+      items: {
+        include: {
+          bankAccounts: {
+            where: { id: id },
+          },
+        },
+      },
+    },
+  });
+
+  const bankAccount = userWithBankAccount?.items
+    .flatMap((item) => item.bankAccounts)
+    .find((bankAccount) => +bankAccount.id.toString() === id);
+
+  if (!bankAccount) return null;
 
   return (
     <div className="bg-white rounded-xl shadow-md text-center p-2">
       <strong
         className={cn({
-          "text-emerald-400": account.balance >= 0,
-          "text-red-500": account.balance < 0,
+          "text-emerald-400": bankAccount.balance >= 0,
+          "text-red-500": bankAccount.balance < 0,
         })}
       >
-        {account.balance} €
+        {bankAccount.balance} €
       </strong>
       <div>
-        <strong className="text-xs text-slate-400">{account.name}</strong>
+        <strong className="text-xs text-slate-400">{bankAccount.name}</strong>
       </div>
     </div>
   );

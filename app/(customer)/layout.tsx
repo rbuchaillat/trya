@@ -47,10 +47,10 @@ export default async function CustomerLayout({
             </li>
             <li>
               <Link
-                href={ROUTES.FINANCIAL}
+                href={ROUTES.BUDGET}
                 className={buttonVariants({ variant: "outline" })}
               >
-                Revenus & Dépenses
+                Gestion du budget
               </Link>
             </li>
           </ul>
