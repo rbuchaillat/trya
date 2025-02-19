@@ -12,6 +12,7 @@ export const AccountsList = async () => {
 
   const items = await prisma.item.findMany({
     where: { userId: user.bridgeId },
+    include: { bankAccounts: true },
   });
 
   if (!items) return null;
@@ -19,10 +20,6 @@ export const AccountsList = async () => {
   return (
     <div className="grid gap-y-3">
       {items.map(async (item) => {
-        const accounts = await prisma.bankAccount.findMany({
-          where: { item_id: +item.id.toString() },
-        });
-
         return (
           <div
             key={item.id}
@@ -40,17 +37,21 @@ export const AccountsList = async () => {
                     } logo`}
                   />
                 )}
-                <p>{item.provider_group_name ?? item.provider_name}</p>
+                <p className="font-bold">
+                  {item.provider_group_name ?? item.provider_name}
+                </p>
               </div>
             )}
-            {accounts && (
+            {item.bankAccounts && (
               <div className="grid gap-y-2">
-                {accounts.map((account) => {
+                {item.bankAccounts.map((account) => {
                   return (
                     <div key={account.id}>
                       <Link href={`${ROUTES.ACCOUNTS}/${account.id}`}>
-                        <div className="border rounded-md p-3 flex justify-between items-center">
-                          <span>{account.name}</span>
+                        <div className="border rounded-md p-3 flex justify-between items-center hover:bg-slate-100 group/account">
+                          <span className="font-semibold group-hover/account:font-bold">
+                            {account.name}
+                          </span>
                           <strong
                             className={cn({
                               "text-emerald-400": account.balance >= 0,

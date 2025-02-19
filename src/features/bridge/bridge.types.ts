@@ -18,7 +18,7 @@ export type CreateConnectSessionResponse = {
 };
 
 export type ItemResponse = {
-  id: number;
+  id: string;
   status: number;
   status_code_info?: string;
   status_code_description?: string;
@@ -76,7 +76,7 @@ export type ProviderResponse = {
 };
 
 export type BankAccountResponse = {
-  id: number;
+  id: string;
   name: string;
   balance: number;
   accounting_balance?: number;
@@ -85,7 +85,7 @@ export type BankAccountResponse = {
   last_refresh_status?: string;
   type: string;
   currency_code: string;
-  item_id: number;
+  item_id: string;
   provider_id: number;
   loan_details?: {
     next_payment_date?: string;
@@ -112,7 +112,7 @@ export type BankAccountsResponse = {
 };
 
 export type TransactionResponse = {
-  id: number;
+  id: string;
   clean_description: string;
   provider_description: string;
   amount: number;
@@ -125,7 +125,7 @@ export type TransactionResponse = {
   deleted?: boolean;
   category_id?: number;
   operation_type: string;
-  account_id: number;
+  account_id: string;
   future?: boolean;
 };
 

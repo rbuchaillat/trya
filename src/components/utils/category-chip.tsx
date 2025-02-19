@@ -2,19 +2,19 @@
 
 import { XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Category, CategoryGroup } from "@prisma/client";
+import { Category } from "@prisma/client";
 import { cn } from "@/lib/utils";
-import { prisma } from "@/lib/prisma";
 import { removeTransitionCategory } from "@/features/transaction/transaction.action";
 import { COLORS } from "@/features/category/category.constant";
 import { CategoryCommand } from "./category-command";
+import { getCategories } from "@/features/category/category.action";
 
 export const CategoryChip = ({
   label,
   transactionId,
 }: {
   label?: string;
-  transactionId: number;
+  transactionId: string;
 }) => {
   if (!label) {
     return <AddCategoryButton transactionId={transactionId} />;
@@ -50,12 +50,10 @@ export const CategoryChip = ({
   );
 };
 
-const AddCategoryButton = ({ transactionId }: { transactionId: number }) => {
+const AddCategoryButton = ({ transactionId }: { transactionId: string }) => {
   const categoryCommandRef = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
-  const [categoryGroups, setCategoryGroups] = useState<
-    (CategoryGroup & { categories: Category[] })[]
-  >([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
@@ -71,12 +69,8 @@ const AddCategoryButton = ({ transactionId }: { transactionId: number }) => {
   useEffect(() => {
     if (open) {
       const fetchData = async () => {
-        const categoryGroups = await prisma.categoryGroup.findMany({
-          include: {
-            categories: true,
-          },
-        });
-        setCategoryGroups(categoryGroups);
+        const categories = await getCategories();
+        setCategories(categories);
       };
       fetchData();
     }
@@ -110,7 +104,7 @@ const AddCategoryButton = ({ transactionId }: { transactionId: number }) => {
       {open && (
         <div ref={categoryCommandRef} className="absolute">
           <CategoryCommand
-            categoryGroups={categoryGroups}
+            categories={categories}
             transactionId={transactionId}
             onClick={handleClick}
           />

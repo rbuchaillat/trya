@@ -7,10 +7,12 @@ import {
   authActionClient,
   authActionClientWithAccessToken,
 } from "@/lib/safe-action";
+import { classifyTransactionsByCategory } from "@/features/transaction/transaction.action";
 import {
   AuthorizationTokenResponse,
   CreateConnectSessionResponse,
   CreateUserResponse,
+  TransactionsResponse,
 } from "./bridge.types";
 
 const defaultHeaders = {
@@ -97,6 +99,78 @@ export const createConnectSession = authActionClientWithAccessToken.action(
     if (!data) {
       throw new Error("Error creating connect session");
     }
+
+    return data;
+  }
+);
+
+export const refreshBankAccounts = authActionClientWithAccessToken.action(
+  async ({ ctx: { user, accessToken } }) => {
+    const userWithBankAccounts = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { items: { include: { bankAccounts: true } } },
+    });
+
+    const bankAccounts = userWithBankAccounts?.items.flatMap(
+      (item) => item.bankAccounts
+    );
+
+    if (!bankAccounts) return [];
+
+    const data = await Promise.all(
+      bankAccounts.map(async (bankAccount) => {
+        const since = bankAccount.updated_at.toISOString();
+        const minDate = since.split("T")[0];
+
+        const response = await fetch(
+          `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${bankAccount.id}&since=${since}&min_date=${minDate}`,
+          {
+            headers: {
+              ...defaultHeaders,
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        const transactions: TransactionsResponse = await response.json();
+
+        if (transactions.resources.length > 0) {
+          await prisma.transaction.createMany({
+            data: transactions.resources.map((transaction) => ({
+              ...transaction,
+              id: transaction.id,
+              account_id: transaction.account_id,
+            })),
+            skipDuplicates: true,
+          });
+
+          const transactionsByCategory = await classifyTransactionsByCategory(
+            transactions.resources
+          );
+
+          const updateQuery = transactionsByCategory
+            .map(({ transactionId, categoryId }) => {
+              return `WHEN id = ${transactionId} THEN ${categoryId}`;
+            })
+            .join(" ");
+
+          const query = `
+                  UPDATE "Transaction"
+                  SET "categoryId" = CASE
+                    ${updateQuery}
+                    ELSE "categoryId"
+                  END
+                  WHERE "id" IN (${transactionsByCategory
+                    .map((pair) => pair.transactionId)
+                    .join(", ")})
+                `;
+
+          await prisma.$executeRawUnsafe(query);
+        }
+
+        return transactions;
+      })
+    );
 
     return data;
   }

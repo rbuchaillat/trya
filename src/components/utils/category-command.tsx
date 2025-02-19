@@ -1,10 +1,9 @@
-import { Category, CategoryGroup } from "@prisma/client";
+import { Category } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { COLORS } from "@/features/category/category.constant";
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
@@ -12,12 +11,12 @@ import {
 import { addTransitionCategory } from "@/features/transaction/transaction.action";
 
 export function CategoryCommand({
-  categoryGroups,
+  categories,
   transactionId,
   onClick,
 }: {
-  categoryGroups: (CategoryGroup & { categories: Category[] })[];
-  transactionId: number;
+  categories: Category[];
+  transactionId: string;
   onClick?: () => void;
 }) {
   return (
@@ -25,33 +24,27 @@ export function CategoryCommand({
       <CommandInput placeholder="Rechercher une catégorie..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        {categoryGroups.map((categoryGroup) => {
+        {categories.map((category) => {
           return (
-            <CommandGroup key={categoryGroup.id} heading={categoryGroup.name}>
-              {categoryGroup.categories.map((category) => {
-                return (
-                  <CommandItem key={category.id}>
-                    <div
-                      className="flex gap-2 w-full"
-                      onClick={async () => {
-                        await addTransitionCategory(transactionId, category.id);
-                        onClick?.();
-                      }}
-                    >
-                      <div
-                        className={cn(
-                          "size-4 rounded-full text-10 text-white flex items-center justify-center shrink-0 font-black",
-                          COLORS[category.name]
-                        )}
-                      >
-                        {category.name.charAt(0)}
-                      </div>
-                      <span>{category.name}</span>
-                    </div>
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
+            <CommandItem key={category.id}>
+              <div
+                className="flex gap-2 w-full"
+                onClick={async () => {
+                  await addTransitionCategory(transactionId, category.id);
+                  onClick?.();
+                }}
+              >
+                <div
+                  className={cn(
+                    "size-4 rounded-full text-10 text-white flex items-center justify-center shrink-0 font-black",
+                    COLORS[category.name]
+                  )}
+                >
+                  {category.name.charAt(0)}
+                </div>
+                <span>{category.name}</span>
+              </div>
+            </CommandItem>
           );
         })}
       </CommandList>

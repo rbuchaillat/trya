@@ -1,11 +1,4 @@
-import {
-  BankAccount,
-  Category,
-  CategoryGroup,
-  Item,
-  Transaction,
-  User,
-} from "@prisma/client";
+import { BankAccount, Category, Item, Transaction, User } from "@prisma/client";
 import {
   NEEDS_CATEGORIES,
   SAVINGS_CATEGORIES,
@@ -25,17 +18,17 @@ type BankAccountWithTransactions = BankAccount & {
 };
 
 type TransactionWithCategory = Transaction & {
-  category: Category & { categoryGroup: CategoryGroup };
+  category: Category;
 };
 
 function categorizeTransaction(
   transaction: TransactionWithCategory
 ): string | undefined {
-  const categoryGroupName = transaction.category.categoryGroup.name;
+  const category = transaction.category.name;
 
-  if (NEEDS_CATEGORIES.includes(categoryGroupName)) return "needs";
-  if (SAVINGS_CATEGORIES.includes(categoryGroupName)) return "savings";
-  if (WANTS_CATEGORIES.includes(categoryGroupName)) return "wants";
+  if (NEEDS_CATEGORIES.includes(category)) return "needs";
+  if (SAVINGS_CATEGORIES.includes(category)) return "savings";
+  if (WANTS_CATEGORIES.includes(category)) return "wants";
 }
 
 function calculateTotalExpenses(
@@ -56,6 +49,7 @@ export function categorizeBudget(userTransactions: UserTransactions) {
   userTransactions.items.forEach((item) =>
     item.bankAccounts.forEach((bankAccount) =>
       bankAccount.transactions.forEach((transaction) => {
+        if (!transaction.category) return;
         const category = categorizeTransaction(transaction);
         if (category) budget[category].push(transaction);
       })

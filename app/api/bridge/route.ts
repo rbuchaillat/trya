@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { getLastMonthDates } from "@/utils/date";
 import { prisma } from "@/lib/prisma";
 import {
   BankAccountResponse,
@@ -28,21 +29,21 @@ export async function POST(request: NextRequest) {
     switch (data.type) {
       case "item.created":
         try {
-          const responseItems = await fetch(
+          const responseItem = await fetch(
             `https://api.bridgeapi.io/v3/aggregation/items/${data.content.item_id}`,
             { headers }
           );
 
-          if (!responseItems.ok) {
+          if (!responseItem.ok) {
             throw new Error(
               "Error fetching data from Bridge API (item.created)"
             );
           }
 
-          const items: ItemResponse = await responseItems.json();
+          const item: ItemResponse = await responseItem.json();
 
           const responseProvider = await fetch(
-            `https://api.bridgeapi.io/v3/providers/${items.provider_id}`,
+            `https://api.bridgeapi.io/v3/providers/${item.provider_id}`,
             { headers }
           );
 
@@ -57,7 +58,8 @@ export async function POST(request: NextRequest) {
           if (user?.bridgeId) {
             await prisma.item.create({
               data: {
-                ...items,
+                ...item,
+                id: item.id.toString(),
                 provider_name: provider.name,
                 provider_group_name: provider.group_name,
                 provider_images_logo: provider.images.logo,
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
               status_code_description: data.content.status_code_description,
             },
             where: {
-              id: data.content.item_id,
+              id: data.content.item_id.toString(),
               userId: data.content.user_uuid,
             },
           });
@@ -96,13 +98,16 @@ export async function POST(request: NextRequest) {
 
       case "item.account.created":
         try {
+          const { startDate } = getLastMonthDates();
+          const minDate = startDate.split("T")[0];
+
           const [responseAccount, responseTransactions] = await Promise.all([
             fetch(
               `https://api.bridgeapi.io/v3/aggregation/accounts/${data.content.account_id}`,
               { headers }
             ),
             fetch(
-              `https://api.bridgeapi.io/v3/aggregation/transactions?limit=500&account_id=${data.content.account_id}`,
+              `https://api.bridgeapi.io/v3/aggregation/transactions?limit=500&account_id=${data.content.account_id}&min_date=${minDate}`,
               { headers }
             ),
           ]);
@@ -118,21 +123,33 @@ export async function POST(request: NextRequest) {
             await responseTransactions.json();
 
           await prisma.bankAccount.create({
-            data: account,
+            data: {
+              ...account,
+              id: account.id.toString(),
+              item_id: account.item_id.toString(),
+            },
           });
 
           await prisma.transaction.createMany({
-            data: transactions.resources,
+            data: transactions.resources.map((transaction) => ({
+              ...transaction,
+              id: transaction.id.toString(),
+              account_id: transaction.account_id.toString(),
+            })),
             skipDuplicates: true,
           });
 
           const transactionsByCategory = await classifyTransactionsByCategory(
-            transactions.resources
+            transactions.resources.map((transaction) => ({
+              ...transaction,
+              id: transaction.id.toString(),
+              account_id: transaction.account_id.toString(),
+            }))
           );
 
           const updateQuery = transactionsByCategory
             .map(({ transactionId, categoryId }) => {
-              return `WHEN id = ${transactionId} THEN ${categoryId}`;
+              return `WHEN id = '${transactionId}' THEN ${categoryId}`;
             })
             .join(" ");
 
@@ -143,7 +160,7 @@ export async function POST(request: NextRequest) {
               ELSE "categoryId"
             END
             WHERE "id" IN (${transactionsByCategory
-              .map((pair) => pair.transactionId)
+              .map((pair) => `'${pair.transactionId}'`)
               .join(", ")})
           `;
 
@@ -159,13 +176,16 @@ export async function POST(request: NextRequest) {
           if (data.content.data_access === "enabled") {
             const bankAccountUpdated = await prisma.bankAccount.update({
               data: { balance: data.content.balance },
-              where: { id: data.content.account_id },
+              where: { id: data.content.account_id.toString() },
             });
 
             const since = bankAccountUpdated.updated_at.toISOString();
 
+            const { startDate } = getLastMonthDates();
+            const minDate = startDate.split("T")[0];
+
             const response = await fetch(
-              `https://api.bridgeapi.io/v3/aggregation/transactions?since=${since}&account_id=${data.content.account_id}`,
+              `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${data.content.account_id}&since=${since}&min_date=${minDate}`,
               { headers }
             );
 
@@ -179,22 +199,30 @@ export async function POST(request: NextRequest) {
 
             await Promise.all([
               prisma.transaction.createMany({
-                data: transactions.resources,
+                data: transactions.resources.map((transaction) => ({
+                  ...transaction,
+                  id: transaction.id.toString(),
+                  account_id: transaction.account_id.toString(),
+                })),
                 skipDuplicates: true,
               }),
               prisma.bankAccount.update({
                 data: { updated_at: new Date() },
-                where: { id: data.content.account_id },
+                where: { id: data.content.account_id.toString() },
               }),
             ]);
 
             const transactionsByCategory = await classifyTransactionsByCategory(
-              transactions.resources
+              transactions.resources.map((transaction) => ({
+                ...transaction,
+                id: transaction.id.toString(),
+                account_id: transaction.account_id.toString(),
+              }))
             );
 
             const updateQuery = transactionsByCategory
               .map(({ transactionId, categoryId }) => {
-                return `WHEN id = ${transactionId} THEN ${categoryId}`;
+                return `WHEN id = '${transactionId}' THEN ${categoryId}`;
               })
               .join(" ");
 
@@ -205,14 +233,14 @@ export async function POST(request: NextRequest) {
                 ELSE "categoryId"
               END
               WHERE "id" IN (${transactionsByCategory
-                .map((pair) => pair.transactionId)
+                .map((pair) => `'${pair.transactionId}'`)
                 .join(", ")})
             `;
 
             await prisma.$executeRawUnsafe(query);
           } else {
             const account = await prisma.bankAccount.findUnique({
-              where: { id: data.content.account_id },
+              where: { id: data.content.account_id.toString() },
             });
 
             if (account) {
@@ -230,7 +258,7 @@ export async function POST(request: NextRequest) {
       case "item.account.deleted":
         try {
           await prisma.bankAccount.delete({
-            where: { id: data.content.account_id },
+            where: { id: data.content.account_id.toString() },
           });
         } catch (error) {
           console.error(

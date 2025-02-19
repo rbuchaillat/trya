@@ -73,7 +73,7 @@ model BridgeToken {
 }
 
 model Item {
-  id                      BigInt        @id
+  id                      String        @id
   userId                  String
   provider_id             Int
   provider_name           String?
@@ -93,7 +93,7 @@ model Item {
 }
 
 model BankAccount {
-  id                  BigInt        @id
+  id                  String        @id
   name                String
   balance             Float
   accounting_balance  Float?
@@ -102,7 +102,7 @@ model BankAccount {
   last_refresh_status String?
   type                String
   currency_code       String
-  item_id             BigInt
+  item_id             String
   provider_id         Int
   loan_details        Json?
   pro                 Boolean?
@@ -114,14 +114,14 @@ model BankAccount {
 }
 
 model Transaction {
-  id                   BigInt   @id
+  id                   String   @id
   clean_description    String
   provider_description String
   amount               Float
   currency_code        String
   deleted              Boolean?
   operation_type       String
-  account_id           BigInt
+  account_id           String
   future               Boolean?
   categoryId           Int?
 
@@ -135,20 +135,9 @@ model Transaction {
   category    Category?   @relation(fields: [categoryId], references: [id])
 }
 
-model CategoryGroup {
-  id         Int        @id @default(autoincrement())
-  name       String
-  categories Category[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model Category {
-  id              Int           @id @default(autoincrement())
-  name            String
-  categoryGroupId Int
-  categoryGroup   CategoryGroup @relation(fields: [categoryGroupId], references: [id], onDelete: Cascade)
+  id   Int    @id @default(autoincrement())
+  name String
 
   transactions Transaction[]
 

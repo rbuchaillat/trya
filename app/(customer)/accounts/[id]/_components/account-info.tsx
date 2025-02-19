@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { requiredCurrentUser } from "@/features/user/user.action";
 
-export const AccountInfo = async (props: { id: number }) => {
+export const AccountInfo = async (props: { id: string }) => {
   const { id } = props;
 
   const user = await requiredCurrentUser();
@@ -22,7 +22,7 @@ export const AccountInfo = async (props: { id: number }) => {
 
   const bankAccount = userWithBankAccount?.items
     .flatMap((item) => item.bankAccounts)
-    .find((bankAccount) => +bankAccount.id.toString() === id);
+    .find((bankAccount) => bankAccount.id === id);
 
   if (!bankAccount) return null;
 

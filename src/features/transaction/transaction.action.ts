@@ -6,7 +6,7 @@ import { openai } from "@/lib/openai";
 import { prisma } from "@/lib/prisma";
 import { ROUTES } from "@/types/routes";
 
-export const addTransitionCategory = async (id: number, categoryId: number) => {
+export const addTransitionCategory = async (id: string, categoryId: number) => {
   const transaction = await prisma.transaction.update({
     where: { id },
     data: { categoryId },
@@ -14,7 +14,7 @@ export const addTransitionCategory = async (id: number, categoryId: number) => {
   revalidatePath(ROUTES + "/" + transaction.account_id);
 };
 
-export const removeTransitionCategory = async (id: number) => {
+export const removeTransitionCategory = async (id: string) => {
   const transaction = await prisma.transaction.update({
     where: { id },
     data: { categoryId: null },
@@ -44,11 +44,10 @@ export const classifyTransactionsByCategory = async (
       },
       {
         role: "user",
-        content: `Here are banking transaction descriptions: "${transactionsList}". Based on the following categories: ${categoriesList}, what is the corresponding category for each transaction? Please return the results as a list of transaction ID and category ID pairs, with each pair separated by a semicolon. Provide only the list of transaction ID:category ID pairs, with no additional information, text, or explanation.`,
+        content: `Here are banking transaction descriptions: "${transactionsList}". Based on the following categories: ${categoriesList}, what is the corresponding category for each transaction? Make sure not to assign a category randomly. Please return the results as a list of transaction ID and category ID pairs, with each pair separated by a semicolon. Provide only the list of transaction ID:category ID pairs, with no additional information, text, or explanation.`,
       },
     ],
-    model: "gpt-3.5-turbo",
-    // model: "gpt-4-turbo",
+    model: "gpt-4o",
   });
 
   const openaiResponse =

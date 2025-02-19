@@ -9,13 +9,7 @@ export const GlobalBalance = async () => {
 
   const userWithBankAccounts = await prisma.user.findUnique({
     where: { id: user.id },
-    include: {
-      items: {
-        include: {
-          bankAccounts: true,
-        },
-      },
-    },
+    include: { items: { include: { bankAccounts: true } } },
   });
 
   const bankAccounts = userWithBankAccounts?.items.flatMap(

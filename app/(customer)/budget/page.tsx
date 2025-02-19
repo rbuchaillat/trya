@@ -24,11 +24,7 @@ export default async function Budget() {
                   },
                 },
                 include: {
-                  category: {
-                    include: {
-                      categoryGroup: true,
-                    },
-                  },
+                  category: true,
                 },
               },
             },
@@ -59,66 +55,68 @@ export default async function Budget() {
           )}
         </strong>
       </h1>
-      <div className="grid grid-cols-2 gap-8">
-        <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
-          <h2>Votre répartition budgétaire</h2>
-          <div className="mx-auto h-[200px]">
-            <Charts
-              data={[
-                { value: needsExpenses },
-                { value: wantsExpenses },
-                { value: savingsExpenses },
-              ]}
-              colors={[
-                "oklch(.707 .165 254.624)",
-                "oklch(.792 .209 151.711)",
-                "oklch(.852 .199 91.936)",
-              ]}
-            />
+      {userTransactions.items.length !== 0 && (
+        <div className="grid grid-cols-2 gap-8">
+          <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
+            <h2>Votre répartition budgétaire</h2>
+            <div className="mx-auto h-[200px]">
+              <Charts
+                data={[
+                  { value: needsExpenses },
+                  { value: wantsExpenses },
+                  { value: savingsExpenses },
+                ]}
+                colors={[
+                  "oklch(.707 .165 254.624)",
+                  "oklch(.792 .209 151.711)",
+                  "oklch(.852 .199 91.936)",
+                ]}
+              />
+            </div>
+            <div className="grid gap-1 text-xs">
+              <div className="flex gap-2 items-center">
+                <div className="size-3 rounded-full bg-blue-400" /> Dépenses
+                pour vos besoins ({needsPercentage}%)
+              </div>
+              <div className="flex gap-2 items-center">
+                <div className="size-3 rounded-full bg-green-400" /> Dépenses
+                dédiés à vos envies ({wantsPercentage}%)
+              </div>
+              <div className="flex gap-2 items-center">
+                <div className="size-3 rounded-full bg-yellow-400" /> Dépenses
+                pour votre épargne ({savingsPercentage}%)
+              </div>
+            </div>
           </div>
-          <div className="grid gap-1 text-xs">
-            <div className="flex gap-2 items-center">
-              <div className="size-3 rounded-full bg-blue-400" /> Dépenses pour
-              vos besoins ({needsPercentage}%)
+          <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
+            <h2>La répartition budgétaire recommandée</h2>
+            <div className="mx-auto h-[200px]">
+              <Charts
+                data={[{ value: 50 }, { value: 30 }, { value: 20 }]}
+                colors={[
+                  "oklch(.707 .165 254.624)",
+                  "oklch(.792 .209 151.711)",
+                  "oklch(.852 .199 91.936)",
+                ]}
+              />
             </div>
-            <div className="flex gap-2 items-center">
-              <div className="size-3 rounded-full bg-green-400" /> Dépenses
-              dédiés à vos envies ({wantsPercentage}%)
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="size-3 rounded-full bg-yellow-400" /> Dépenses
-              pour votre épargne ({savingsPercentage}%)
+            <div className="grid gap-1 text-xs">
+              <div className="flex gap-2 items-center">
+                <div className="size-3 rounded-full bg-blue-400" /> Dépenses
+                pour vos besoins (50%)
+              </div>
+              <div className="flex gap-2 items-center">
+                <div className="size-3 rounded-full bg-green-400" /> Dépenses
+                dédiés à vos envies (30%)
+              </div>
+              <div className="flex gap-2 items-center">
+                <div className="size-3 rounded-full bg-yellow-400" /> Dépenses
+                pour votre épargne (20%)
+              </div>
             </div>
           </div>
         </div>
-        <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
-          <h2>La répartition budgétaire recommandée</h2>
-          <div className="mx-auto h-[200px]">
-            <Charts
-              data={[{ value: 50 }, { value: 30 }, { value: 20 }]}
-              colors={[
-                "oklch(.707 .165 254.624)",
-                "oklch(.792 .209 151.711)",
-                "oklch(.852 .199 91.936)",
-              ]}
-            />
-          </div>
-          <div className="grid gap-1 text-xs">
-            <div className="flex gap-2 items-center">
-              <div className="size-3 rounded-full bg-blue-400" /> Dépenses pour
-              vos besoins (50%)
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="size-3 rounded-full bg-green-400" /> Dépenses
-              dédiés à vos envies (30%)
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="size-3 rounded-full bg-yellow-400" /> Dépenses
-              pour votre épargne (20%)
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </section>
   );
 }

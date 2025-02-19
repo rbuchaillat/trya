@@ -11,8 +11,8 @@ export default async function Account({
   return (
     <section className="grid gap-y-5 bg-slate-100 rounded-2xl p-4">
       <h1>Transactions</h1>
-      <AccountInfo id={+id} />
-      <TransactionsList accountId={+id} />
+      <AccountInfo id={id} />
+      <TransactionsList accountId={id} />
     </section>
   );
 }
