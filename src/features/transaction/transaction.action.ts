@@ -44,7 +44,7 @@ export const classifyTransactionsByCategory = async (
       },
       {
         role: "user",
-        content: `Here are banking transaction descriptions: "${transactionsList}". Based on the following categories: ${categoriesList}, what is the corresponding category for each transaction? Make sure not to assign a category randomly. Please return the results as a list of transaction ID and category ID pairs, with each pair separated by a semicolon. Provide only the list of transaction ID:category ID pairs, with no additional information, text, or explanation.`,
+        content: `Here are banking transaction descriptions: "${transactionsList}". Based on the following categories: ${categoriesList}, what is the corresponding category for each transaction? Make sure not to assign a category randomly. Please return the results as a list of transaction ID and category ID pairs, with each pair separated by a semicolon. Provide only the list of transaction ID:category ID pairs, with no additional information, text, or explanation. If no category can be determined, do not return anything for that transaction.`,
       },
     ],
     model: "gpt-4o",
