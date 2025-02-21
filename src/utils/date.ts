@@ -1,3 +1,10 @@
+export const formatDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 export const formatDateWithShortMonth = (date: Date) => {
   const formattedDate = new Intl.DateTimeFormat("fr-FR", {
     day: "2-digit",
@@ -25,9 +32,6 @@ export const getLastMonthDates = () => {
   );
   const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-  lastDayOfLastMonth.setHours(23, 59, 59, 999);
-  firstDayOfLastMonth.setHours(0, 0, 0, 0);
-
   const localStartDate = new Date(
     firstDayOfLastMonth.getTime() -
       firstDayOfLastMonth.getTimezoneOffset() * 60000
@@ -38,7 +42,7 @@ export const getLastMonthDates = () => {
   );
 
   return {
-    startDate: localStartDate.toISOString(),
-    endDate: localEndDate.toISOString(),
+    startDate: formatDate(localStartDate),
+    endDate: formatDate(localEndDate),
   };
 };

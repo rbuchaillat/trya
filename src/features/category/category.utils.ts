@@ -56,9 +56,33 @@ export function categorizeBudget(userTransactions: UserTransactions) {
     )
   );
 
-  const needsExpenses = +calculateTotalExpenses(budget.needs).toFixed(2);
-  const wantsExpenses = +calculateTotalExpenses(budget.wants).toFixed(2);
-  const savingsExpenses = +calculateTotalExpenses(budget.savings).toFixed(2);
+  const needsTotal = +calculateTotalExpenses(budget.needs).toFixed(2);
+  const wantsTotal = +calculateTotalExpenses(budget.wants).toFixed(2);
+  const savingsTotal = +calculateTotalExpenses(budget.savings).toFixed(2);
 
-  return { needsExpenses, wantsExpenses, savingsExpenses };
+  const needs = { expenses: budget.needs, total: needsTotal };
+  const wants = { expenses: budget.wants, total: wantsTotal };
+  const savings = { expenses: budget.savings, total: savingsTotal };
+
+  return { needs, wants, savings };
+}
+
+export function mergeExpenses(expenses: TransactionWithCategory[]) {
+  const totalExpenses: Record<string, number> = {};
+
+  expenses.forEach((expense) => {
+    const { clean_description, amount } = expense;
+    if (totalExpenses[clean_description]) {
+      totalExpenses[clean_description] += amount;
+    } else {
+      totalExpenses[clean_description] = amount;
+    }
+  });
+
+  const result = Object.entries(totalExpenses).map(([description, total]) => ({
+    clean_description: description,
+    amount: total,
+  }));
+
+  return result;
 }

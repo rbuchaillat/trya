@@ -1,7 +1,9 @@
 "use server";
 
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { ROUTES } from "@/types/routes";
 import {
   actionClient,
   authActionClient,
@@ -10,6 +12,7 @@ import {
 import { classifyTransactionsByCategory } from "@/features/transaction/transaction.action";
 import {
   AuthorizationTokenResponse,
+  BankAccountResponse,
   CreateConnectSessionResponse,
   CreateUserResponse,
   TransactionsResponse,
@@ -115,34 +118,58 @@ export const refreshBankAccounts = authActionClientWithAccessToken.action(
       (item) => item.bankAccounts
     );
 
-    if (!bankAccounts) return [];
+    if (!bankAccounts) return;
 
-    const data = await Promise.all(
+    await Promise.all(
       bankAccounts.map(async (bankAccount) => {
         const since = bankAccount.updated_at.toISOString();
         const minDate = since.split("T")[0];
 
-        const response = await fetch(
-          `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${bankAccount.id}&since=${since}&min_date=${minDate}`,
-          {
-            headers: {
-              ...defaultHeaders,
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
+        const [responseBankAccount, responseTransactions] = await Promise.all([
+          fetch(
+            `https://api.bridgeapi.io/v3/aggregation/accounts/${bankAccount.id}`,
+            {
+              headers: {
+                ...defaultHeaders,
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          ),
+          fetch(
+            `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${bankAccount.id}&since=${since}&min_date=${minDate}`,
+            {
+              headers: {
+                ...defaultHeaders,
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          ),
+        ]);
 
-        const transactions: TransactionsResponse = await response.json();
+        const transactions: TransactionsResponse =
+          await responseTransactions.json();
+
+        const _bankAccount: BankAccountResponse =
+          await responseBankAccount.json();
 
         if (transactions.resources.length > 0) {
-          await prisma.transaction.createMany({
-            data: transactions.resources.map((transaction) => ({
-              ...transaction,
-              id: transaction.id,
-              account_id: transaction.account_id,
-            })),
-            skipDuplicates: true,
-          });
+          await Promise.all([
+            prisma.transaction.createMany({
+              data: transactions.resources.map((transaction) => ({
+                ...transaction,
+                id: transaction.id.toString(),
+                account_id: transaction.account_id.toString(),
+              })),
+              skipDuplicates: true,
+            }),
+            prisma.bankAccount.update({
+              data: {
+                balance: _bankAccount.balance,
+                updated_at: _bankAccount.updated_at,
+              },
+              where: { id: bankAccount.id },
+            }),
+          ]);
 
           const transactionsByCategory = await classifyTransactionsByCategory(
             transactions.resources
@@ -150,29 +177,27 @@ export const refreshBankAccounts = authActionClientWithAccessToken.action(
 
           const updateQuery = transactionsByCategory
             .map(({ transactionId, categoryId }) => {
-              return `WHEN id = ${transactionId} THEN ${categoryId}`;
+              return `WHEN id = '${transactionId}' THEN ${categoryId}`;
             })
             .join(" ");
 
           const query = `
-                  UPDATE "Transaction"
-                  SET "categoryId" = CASE
-                    ${updateQuery}
-                    ELSE "categoryId"
-                  END
-                  WHERE "id" IN (${transactionsByCategory
-                    .map((pair) => pair.transactionId)
-                    .join(", ")})
-                `;
+              UPDATE "Transaction"
+              SET "categoryId" = CASE
+                ${updateQuery}
+                ELSE "categoryId"
+              END
+              WHERE "id" IN (${transactionsByCategory
+                .map((pair) => `'${pair.transactionId}'`)
+                .join(", ")})
+            `;
 
           await prisma.$executeRawUnsafe(query);
         }
-
-        return transactions;
       })
     );
 
-    return data;
+    revalidatePath(ROUTES.ACCOUNTS);
   }
 );
 

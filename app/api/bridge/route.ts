@@ -101,32 +101,36 @@ export async function POST(request: NextRequest) {
           const { startDate } = getLastMonthDates();
           const minDate = startDate.split("T")[0];
 
-          const [responseAccount, responseTransactions] = await Promise.all([
-            fetch(
-              `https://api.bridgeapi.io/v3/aggregation/accounts/${data.content.account_id}`,
-              { headers }
-            ),
-            fetch(
-              `https://api.bridgeapi.io/v3/aggregation/transactions?limit=500&account_id=${data.content.account_id}&min_date=${minDate}`,
-              { headers }
-            ),
-          ]);
+          const [responseBankAccount, responseTransactions] = await Promise.all(
+            [
+              fetch(
+                `https://api.bridgeapi.io/v3/aggregation/accounts/${data.content.account_id}`,
+                { headers }
+              ),
+              fetch(
+                `https://api.bridgeapi.io/v3/aggregation/transactions?limit=500&account_id=${data.content.account_id}&min_date=${minDate}`,
+                { headers }
+              ),
+            ]
+          );
 
-          if (!responseAccount.ok || !responseTransactions.ok) {
+          if (!responseBankAccount.ok || !responseTransactions.ok) {
             throw new Error(
               "Error fetching data from Bridge API (item.account.created)"
             );
           }
 
-          const account: BankAccountResponse = await responseAccount.json();
+          const bankAccount: BankAccountResponse =
+            await responseBankAccount.json();
+
           const transactions: TransactionsResponse =
             await responseTransactions.json();
 
           await prisma.bankAccount.create({
             data: {
-              ...account,
-              id: account.id.toString(),
-              item_id: account.item_id.toString(),
+              ...bankAccount,
+              id: bankAccount.id.toString(),
+              item_id: bankAccount.item_id.toString(),
             },
           });
 
@@ -140,11 +144,7 @@ export async function POST(request: NextRequest) {
           });
 
           const transactionsByCategory = await classifyTransactionsByCategory(
-            transactions.resources.map((transaction) => ({
-              ...transaction,
-              id: transaction.id.toString(),
-              account_id: transaction.account_id.toString(),
-            }))
+            transactions.resources
           );
 
           const updateQuery = transactionsByCategory
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
         try {
           if (data.content.data_access === "enabled") {
             const bankAccountUpdated = await prisma.bankAccount.update({
-              data: { balance: data.content.balance },
+              data: { balance: data.content.balance, updated_at: new Date() },
               where: { id: data.content.account_id.toString() },
             });
 
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
             const minDate = startDate.split("T")[0];
 
             const response = await fetch(
-              `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${data.content.account_id}&since=${since}&min_date=${minDate}`,
+              `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${data.content.account_id}&since=${since}&min_date=${minDate}&limit=500`,
               { headers }
             );
 
@@ -197,27 +197,17 @@ export async function POST(request: NextRequest) {
 
             const transactions: TransactionsResponse = await response.json();
 
-            await Promise.all([
-              prisma.transaction.createMany({
-                data: transactions.resources.map((transaction) => ({
-                  ...transaction,
-                  id: transaction.id.toString(),
-                  account_id: transaction.account_id.toString(),
-                })),
-                skipDuplicates: true,
-              }),
-              prisma.bankAccount.update({
-                data: { updated_at: new Date() },
-                where: { id: data.content.account_id.toString() },
-              }),
-            ]);
-
-            const transactionsByCategory = await classifyTransactionsByCategory(
-              transactions.resources.map((transaction) => ({
+            await prisma.transaction.createMany({
+              data: transactions.resources.map((transaction) => ({
                 ...transaction,
                 id: transaction.id.toString(),
                 account_id: transaction.account_id.toString(),
-              }))
+              })),
+              skipDuplicates: true,
+            });
+
+            const transactionsByCategory = await classifyTransactionsByCategory(
+              transactions.resources
             );
 
             const updateQuery = transactionsByCategory
