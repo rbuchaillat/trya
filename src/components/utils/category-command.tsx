@@ -8,7 +8,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { addTransitionCategory } from "@/features/transaction/transaction.action";
+import { addTransactionCategory } from "@/features/transaction/transaction.action";
 
 export function CategoryCommand({
   categories,
@@ -20,7 +20,7 @@ export function CategoryCommand({
   onClick?: () => void;
 }) {
   return (
-    <Command className="rounded-lg border shadow-md md:min-w-[325px]">
+    <Command className="rounded-lg border shadow-md md:min-w-[325px] relative z-10">
       <CommandInput placeholder="Rechercher une catégorie..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
@@ -30,7 +30,7 @@ export function CategoryCommand({
               <div
                 className="flex gap-2 w-full"
                 onClick={async () => {
-                  await addTransitionCategory(transactionId, category.id);
+                  await addTransactionCategory(transactionId, category.id);
                   onClick?.();
                 }}
               >

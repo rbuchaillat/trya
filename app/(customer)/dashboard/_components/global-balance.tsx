@@ -31,7 +31,7 @@ export const GlobalBalance = async () => {
         <Link href={ROUTES.ACCOUNTS} className="rounded-full">
           <div className="group/balance shadow-[0_0_6px_#47638840] py-2 pl-5 pr-2 bg-white flex gap-x-2.5 items-center rounded-full h-10">
             <span className="text-slate-600 font-extrabold text-xl">
-              {totalBalance} €
+              {totalBalance?.toFixed(2)} €
             </span>
             <div className="size-6 bg-slate-600 rounded-full flex items-center justify-center group-hover/balance:bg-green-400 transition-colors duration-300">
               <ArrowRightIcon

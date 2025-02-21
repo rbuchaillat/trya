@@ -13,11 +13,13 @@ export const RefreshButton = () => {
   const handleClick = async () => {
     setLoading(true);
     try {
-      await refreshBankAccounts();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      Promise.all([
+        await refreshBankAccounts(),
+        await new Promise((resolve) => setTimeout(resolve, 500)),
+      ]);
       toast.success("Vos comptes ont été mis à jour avec succès");
     } catch (error) {
-      console.error("Vos comptes ont été mis à jour", error);
+      console.error("Vos comptes n'ont pas été mis à jour", error);
       toast.error(
         "Une erreur est survenue. Vos comptes n'ont pas été mis à jour"
       );

@@ -5,21 +5,15 @@ export const formatDate = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-export const formatDateWithShortMonth = (date: Date) => {
-  const formattedDate = new Intl.DateTimeFormat("fr-FR", {
+export const formatDateWithDayAndShortMonth = (date: Date) => {
+  return new Intl.DateTimeFormat("fr-FR", {
     day: "2-digit",
     month: "short",
   }).format(date);
-
-  return formattedDate;
 };
 
-export const formatDateWithLongMonth = (date: Date) => {
-  const formattedDate = new Intl.DateTimeFormat("fr-FR", {
-    month: "long",
-  }).format(date);
-
-  return formattedDate;
+export const formatDateWithMonth = (date: Date) => {
+  return new Intl.DateTimeFormat("fr-FR", { month: "long" }).format(date);
 };
 
 export const getLastMonthDates = () => {
@@ -30,12 +24,12 @@ export const getLastMonthDates = () => {
     now.getMonth() - 1,
     1
   );
-  const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-
   const localStartDate = new Date(
     firstDayOfLastMonth.getTime() -
       firstDayOfLastMonth.getTimezoneOffset() * 60000
   );
+
+  const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
   const localEndDate = new Date(
     lastDayOfLastMonth.getTime() -
       lastDayOfLastMonth.getTimezoneOffset() * 60000

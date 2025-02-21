@@ -9,7 +9,10 @@ import {
   authActionClient,
   authActionClientWithAccessToken,
 } from "@/lib/safe-action";
-import { classifyTransactionsByCategory } from "@/features/transaction/transaction.action";
+import {
+  classifyTransactionsByCategory,
+  updateTransactionsCategory,
+} from "@/features/transaction/transaction.action";
 import {
   AuthorizationTokenResponse,
   BankAccountResponse,
@@ -89,7 +92,9 @@ export const createConnectSession = authActionClientWithAccessToken.action(
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ user_email: user.email }),
+        body: JSON.stringify({
+          user_email: user.email,
+        }),
       }
     );
 
@@ -106,6 +111,26 @@ export const createConnectSession = authActionClientWithAccessToken.action(
     return data;
   }
 );
+
+export const deleteItem = authActionClientWithAccessToken
+  .schema(z.object({ id: z.string() }))
+  .action(async ({ ctx: { accessToken }, parsedInput: { id } }) => {
+    const response = await fetch(
+      `https://api.bridgeapi.io/v3/aggregation/items/${id}`,
+      {
+        method: "DELETE",
+        headers: { ...defaultHeaders, Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status} : ${response.statusText}`);
+    }
+
+    await prisma.item.delete({ where: { id } });
+
+    revalidatePath(ROUTES.ACCOUNTS);
+  });
 
 export const refreshBankAccounts = authActionClientWithAccessToken.action(
   async ({ ctx: { user, accessToken } }) => {
@@ -175,24 +200,7 @@ export const refreshBankAccounts = authActionClientWithAccessToken.action(
             transactions.resources
           );
 
-          const updateQuery = transactionsByCategory
-            .map(({ transactionId, categoryId }) => {
-              return `WHEN id = '${transactionId}' THEN ${categoryId}`;
-            })
-            .join(" ");
-
-          const query = `
-              UPDATE "Transaction"
-              SET "categoryId" = CASE
-                ${updateQuery}
-                ELSE "categoryId"
-              END
-              WHERE "id" IN (${transactionsByCategory
-                .map((pair) => `'${pair.transactionId}'`)
-                .join(", ")})
-            `;
-
-          await prisma.$executeRawUnsafe(query);
+          await updateTransactionsCategory(transactionsByCategory);
         }
       })
     );

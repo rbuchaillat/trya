@@ -2,7 +2,7 @@ import { CategoryChip } from "@/components/utils/category-chip";
 import { requiredCurrentUser } from "@/features/user/user.action";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
-import { formatDateWithShortMonth } from "@/utils/date";
+import { formatDateWithDayAndShortMonth } from "@/utils/date";
 
 export const TransactionsList = async (props: { accountId: string }) => {
   const { accountId } = props;
@@ -57,7 +57,7 @@ export const TransactionsList = async (props: { accountId: string }) => {
               className="h-10 border-b border-gray-100 hover:bg-slate-100 group/transaction"
             >
               <td className="text-center px-5">
-                <div>{formatDateWithShortMonth(date)}</div>
+                <div>{formatDateWithDayAndShortMonth(date)}</div>
                 {date.getFullYear() !== new Date().getFullYear() && (
                   <div className="text-[8px]">{date.getFullYear()}</div>
                 )}

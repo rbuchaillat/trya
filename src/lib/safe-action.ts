@@ -5,9 +5,7 @@ import { getAccessToken } from "@/features/bridge/bridge.utils";
 export const actionClient = createSafeActionClient({
   handleServerError: (e) => {
     console.error("Action error:", e.message);
-    return {
-      errorMessage: e.message,
-    };
+    return { errorMessage: e.message };
   },
 });
 
@@ -29,8 +27,6 @@ export const authActionClientWithAccessToken = authActionClient.use(
       throw new Error("Access Token not found");
     }
 
-    return next({
-      ctx: { accessToken },
-    });
+    return next({ ctx: { accessToken } });
   }
 );

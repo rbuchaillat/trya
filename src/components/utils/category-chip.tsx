@@ -4,7 +4,7 @@ import { XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Category } from "@prisma/client";
 import { cn } from "@/lib/utils";
-import { removeTransitionCategory } from "@/features/transaction/transaction.action";
+import { removeTransactionCategory } from "@/features/transaction/transaction.action";
 import { COLORS } from "@/features/category/category.constant";
 import { CategoryCommand } from "./category-command";
 import { getCategories } from "@/features/category/category.action";
@@ -21,7 +21,7 @@ export const CategoryChip = ({
   }
 
   const handleClick = async () => {
-    await removeTransitionCategory(transactionId);
+    await removeTransactionCategory(transactionId);
   };
 
   return (

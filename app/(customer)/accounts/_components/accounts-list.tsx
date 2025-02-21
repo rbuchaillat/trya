@@ -1,9 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Trash2Icon } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/types/routes";
 import { requiredCurrentUser } from "@/features/user/user.action";
+import { deleteItem } from "@/features/bridge/bridge.action";
+import { Button } from "@/components/ui/button";
 
 export const AccountsList = async () => {
   const user = await requiredCurrentUser();
@@ -25,23 +28,35 @@ export const AccountsList = async () => {
             key={item.id}
             className="bg-white p-3 rounded-xl shadow-md grid gap-y-3"
           >
-            {(item.provider_group_name || item.provider_name) && (
-              <div className="flex items-center gap-x-0.5">
-                {item.provider_images_logo && (
-                  <Image
-                    src={item.provider_images_logo}
-                    width={36}
-                    height={36}
-                    alt={`${
-                      item.provider_group_name ?? item.provider_name
-                    } logo`}
-                  />
-                )}
-                <p className="font-bold">
-                  {item.provider_group_name ?? item.provider_name}
-                </p>
-              </div>
-            )}
+            <div className="flex justify-between items-center">
+              {(item.provider_group_name || item.provider_name) && (
+                <div className="flex items-center gap-x-0.5">
+                  {item.provider_images_logo && (
+                    <Image
+                      src={item.provider_images_logo}
+                      width={36}
+                      height={36}
+                      alt={`${
+                        item.provider_group_name ?? item.provider_name
+                      } logo`}
+                    />
+                  )}
+                  <p className="font-bold">
+                    {item.provider_group_name ?? item.provider_name}
+                  </p>
+                </div>
+              )}
+              <form
+                action={async () => {
+                  "use server";
+                  await deleteItem({ id: item.id });
+                }}
+              >
+                <Button variant="outline" size="icon">
+                  <Trash2Icon />
+                </Button>
+              </form>
+            </div>
             {item.bankAccounts && (
               <div className="grid gap-y-2">
                 {item.bankAccounts.map((account) => {

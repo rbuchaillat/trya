@@ -4,7 +4,7 @@ import {
 } from "@/features/category/category.utils";
 import { requiredCurrentUser } from "@/features/user/user.action";
 import { prisma } from "@/lib/prisma";
-import { formatDateWithLongMonth, getLastMonthDates } from "@/utils/date";
+import { formatDateWithMonth, getLastMonthDates } from "@/utils/date";
 import { Charts } from "./_components/charts";
 
 export default async function Budget() {
@@ -55,7 +55,7 @@ export default async function Budget() {
       <h1>
         Gestion du budget de{" "}
         <strong className="capitalize">
-          {formatDateWithLongMonth(
+          {formatDateWithMonth(
             new Date(new Date().setMonth(new Date().getMonth() - 1))
           )}
         </strong>
