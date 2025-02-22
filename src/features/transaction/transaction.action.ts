@@ -72,7 +72,9 @@ export const classifyTransactionsByCategory = async (
   const data = openaiResponse
     .split(";")
     .map((pair) => {
-      const [transactionId, categoryId] = pair.split(":");
+      const [transactionId, categoryId] = pair
+        .split(":")
+        .map((item) => item.trim());
       return categoryId !== "unknown" ? { transactionId, categoryId } : null;
     })
     .filter(Boolean) as { transactionId: string; categoryId: string }[];

@@ -89,15 +89,12 @@ export async function POST(request: NextRequest) {
 
           await prisma.item.update({
             data: {
-              account_types: account_types,
+              account_types,
               status: status_code,
-              status_code_info: status_code_info,
-              status_code_description: status_code_description,
+              status_code_info,
+              status_code_description,
             },
-            where: {
-              id: item_id.toString(),
-              userId: user_uuid,
-            },
+            where: { id: item_id.toString(), userId: user_uuid },
           });
         } catch (error) {
           console.error("Error from item.refreshed:", error);
@@ -174,43 +171,47 @@ export async function POST(request: NextRequest) {
       case "item.account.updated":
         try {
           if (data.content.data_access === "enabled") {
-            const bankAccountUpdated = await prisma.bankAccount.update({
-              data: { balance: data.content.balance, updated_at: new Date() },
+            const bankAccount = await prisma.bankAccount.findUnique({
               where: { id: data.content.account_id.toString() },
             });
 
-            const since = bankAccountUpdated.updated_at.toISOString();
+            if (bankAccount) {
+              const since = bankAccount.updated_at.toISOString();
+              const minDate = since.split("T")[0];
 
-            const { startDate } = getLastMonthDates();
-            const minDate = startDate.split("T")[0];
-
-            const response = await fetch(
-              `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${data.content.account_id}&since=${since}&min_date=${minDate}&limit=500`,
-              { headers }
-            );
-
-            if (!response.ok) {
-              throw new Error(
-                `Error fetching data from /transactions/ ${response.status} : ${response.statusText}`
+              const response = await fetch(
+                `https://api.bridgeapi.io/v3/aggregation/transactions?account_id=${data.content.account_id}&since=${since}&min_date=${minDate}&limit=500`,
+                { headers }
               );
-            }
 
-            const transactions: TransactionsResponse = await response.json();
+              if (!response.ok) {
+                throw new Error(
+                  `Error fetching data from /transactions/ ${response.status} : ${response.statusText}`
+                );
+              }
 
-            if (transactions.resources.length !== 0) {
-              await prisma.transaction.createMany({
-                data: transactions.resources.map((transaction) => ({
-                  ...transaction,
-                  id: transaction.id.toString(),
-                  account_id: transaction.account_id.toString(),
-                })),
-                skipDuplicates: true,
+              await prisma.bankAccount.update({
+                data: { balance: data.content.balance, updated_at: new Date() },
+                where: { id: data.content.account_id.toString() },
               });
 
-              const transactionsByCategory =
-                await classifyTransactionsByCategory(transactions.resources);
+              const transactions: TransactionsResponse = await response.json();
 
-              await updateTransactionsCategory(transactionsByCategory);
+              if (transactions.resources.length !== 0) {
+                await prisma.transaction.createMany({
+                  data: transactions.resources.map((transaction) => ({
+                    ...transaction,
+                    id: transaction.id.toString(),
+                    account_id: transaction.account_id.toString(),
+                  })),
+                  skipDuplicates: true,
+                });
+
+                const transactionsByCategory =
+                  await classifyTransactionsByCategory(transactions.resources);
+
+                await updateTransactionsCategory(transactionsByCategory);
+              }
             }
           } else {
             const account = await prisma.bankAccount.findUnique({

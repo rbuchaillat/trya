@@ -21,7 +21,7 @@ async function main() {
     { name: "Revenus" },
     { name: "Épargne et investissements" },
     { name: "Dons et charité" },
-    { name: "Imprévus" },
+    { name: "Virement interne" },
   ];
 
   await prisma.category.createMany({

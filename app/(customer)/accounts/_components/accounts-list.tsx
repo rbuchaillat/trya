@@ -7,6 +7,7 @@ import { ROUTES } from "@/types/routes";
 import { requiredCurrentUser } from "@/features/user/user.action";
 import { deleteItem } from "@/features/bridge/bridge.action";
 import { Button } from "@/components/ui/button";
+import { RefreshBankButton } from "./refresh-bank-button";
 
 export const AccountsList = async () => {
   const user = await requiredCurrentUser();
@@ -44,6 +45,7 @@ export const AccountsList = async () => {
                   <p className="font-bold">
                     {item.provider_group_name ?? item.provider_name}
                   </p>
+                  <RefreshBankButton itemId={+item.id} />
                 </div>
               )}
               <form

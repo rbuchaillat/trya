@@ -17,7 +17,6 @@ export const NEEDS_CATEGORIES = [
   "Alimentation",
   "Auto & Transports",
   "Impôts & Taxes",
-  "Imprévus",
   "Internet / Téléphone mobile",
   "Logement",
   "Santé",
@@ -43,7 +42,6 @@ export const COLORS: Record<string, string> = {
   Abonnements: "bg-orange-400",
   Alimentation: "bg-amber-400",
   Divers: "bg-slate-400",
-  Imprévus: "bg-slate-400",
   Logement: "bg-stone-400",
   Restaurant: "bg-amber-400",
   Revenus: "bg-neutral-400",
@@ -57,5 +55,6 @@ export const COLORS: Record<string, string> = {
   "Impôts & Taxes": "bg-green-400",
   "Internet / Téléphone mobile": "bg-orange-400",
   "Loisirs & Sorties": "bg-yellow-400",
+  "Virement interne": "bg-sky-400",
   "Scolarité & Enfants": "bg-rose-400",
 };
