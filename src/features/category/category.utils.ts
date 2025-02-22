@@ -1,5 +1,6 @@
 import { BankAccount, Category, Item, Transaction, User } from "@prisma/client";
 import {
+  INCOME_BRACKETS,
   NEEDS_CATEGORIES,
   SAVINGS_CATEGORIES,
   WANTS_CATEGORIES,
@@ -85,4 +86,37 @@ export function mergeExpenses(expenses: TransactionWithCategory[]) {
   }));
 
   return result;
+}
+
+export function getIncomeTransactions(userTransactions: UserTransactions) {
+  return userTransactions.items.flatMap((item) =>
+    item.bankAccounts.flatMap((bankAccount) =>
+      bankAccount.transactions.filter(
+        (transaction) => transaction.category?.name === "Revenus"
+      )
+    )
+  );
+}
+
+export function getIncomeValue(incomes: TransactionWithCategory[]) {
+  return incomes
+    .reduce(
+      (accumulator, currentValue) => accumulator + (currentValue.amount || 0),
+      0
+    )
+    .toFixed(2);
+}
+
+export function getBudgetPlan(income: number) {
+  const bracket =
+    INCOME_BRACKETS.find((b) => income <= b.max) ||
+    INCOME_BRACKETS[INCOME_BRACKETS.length - 1];
+
+  const plan = {
+    needs: Math.round((bracket.needs / 100) * income),
+    wants: Math.round((bracket.wants / 100) * income),
+    savings: Math.round((bracket.savings / 100) * income),
+  };
+
+  return { bracket, plan };
 }

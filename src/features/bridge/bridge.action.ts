@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ROUTES } from "@/types/routes";
 import {
@@ -131,6 +132,26 @@ export const deleteItem = authActionClientWithAccessToken
 
     revalidatePath(ROUTES.ACCOUNTS);
   });
+
+export const deleteUser = authActionClientWithAccessToken.action(
+  async ({ ctx: { accessToken, user } }) => {
+    const response = await fetch(
+      `https://api.bridgeapi.io/v3/aggregation/users/${user.bridgeId}`,
+      {
+        method: "DELETE",
+        headers: { ...defaultHeaders, Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status} : ${response.statusText}`);
+    }
+
+    await prisma.user.delete({ where: { id: user.id } });
+
+    redirect(ROUTES.HOME);
+  }
+);
 
 export const refreshBankAccounts = authActionClientWithAccessToken.action(
   async ({ ctx: { user, accessToken } }) => {

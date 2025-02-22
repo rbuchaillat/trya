@@ -5,4 +5,5 @@ export enum ROUTES {
   DASHBOARD = "/dashboard",
   BUDGET = "/budget",
   ACCOUNTS = "/accounts",
+  SETTINGS = "/settings",
 }

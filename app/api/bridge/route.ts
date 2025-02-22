@@ -107,82 +107,63 @@ export async function POST(request: NextRequest) {
 
       case "item.account.created":
         try {
-          const isBankAccountExist = await prisma.bankAccount.findUnique({
-            where: { id: data.content.account_id.toString() },
+          const { startDate } = getLastMonthDates();
+          const minDate = startDate.split("T")[0];
+
+          const [responseBankAccount, responseTransactions] = await Promise.all(
+            [
+              fetch(
+                `https://api.bridgeapi.io/v3/aggregation/accounts/${data.content.account_id}`,
+                { headers }
+              ),
+              fetch(
+                `https://api.bridgeapi.io/v3/aggregation/transactions?limit=500&account_id=${data.content.account_id}&min_date=${minDate}`,
+                { headers }
+              ),
+            ]
+          );
+
+          if (!responseBankAccount.ok) {
+            throw new Error(
+              `Error fetching data from /accounts/ ${responseBankAccount.status} : ${responseBankAccount.statusText}`
+            );
+          }
+
+          if (!responseTransactions.ok) {
+            throw new Error(
+              `Error fetching data from /transactions/ ${responseTransactions.status} : ${responseTransactions.statusText}`
+            );
+          }
+
+          const bankAccount: BankAccountResponse =
+            await responseBankAccount.json();
+
+          await prisma.bankAccount.create({
+            data: {
+              ...bankAccount,
+              id: bankAccount.id.toString(),
+              item_id: bankAccount.item_id.toString(),
+            },
           });
 
-          if (isBankAccountExist) {
-            await prisma.bankAccount.update({
-              data: { balance: data.content.balance },
-              where: { id: data.content.account_id.toString() },
+          const transactions: TransactionsResponse =
+            await responseTransactions.json();
+
+          if (transactions.resources.length !== 0) {
+            await prisma.transaction.createMany({
+              data: transactions.resources.map((transaction) => ({
+                ...transaction,
+                id: transaction.id.toString(),
+                account_id: transaction.account_id.toString(),
+              })),
+              skipDuplicates: true,
             });
-          } else {
-            const { startDate } = getLastMonthDates();
-            const minDate = startDate.split("T")[0];
 
-            const [responseBankAccount, responseTransactions] =
-              await Promise.all([
-                fetch(
-                  `https://api.bridgeapi.io/v3/aggregation/accounts/${data.content.account_id}`,
-                  { headers }
-                ),
-                fetch(
-                  `https://api.bridgeapi.io/v3/aggregation/transactions?limit=500&account_id=${data.content.account_id}&min_date=${minDate}`,
-                  { headers }
-                ),
-              ]);
+            const transactionsByCategory = await classifyTransactionsByCategory(
+              transactions.resources
+            );
 
-            if (!responseBankAccount.ok) {
-              throw new Error(
-                `Error fetching data from /accounts/ ${responseBankAccount.status} : ${responseBankAccount.statusText}`
-              );
-            }
-
-            if (!responseTransactions.ok) {
-              throw new Error(
-                `Error fetching data from /transactions/ ${responseTransactions.status} : ${responseTransactions.statusText}`
-              );
-            }
-
-            const bankAccount: BankAccountResponse =
-              await responseBankAccount.json();
-
-            if (bankAccount) {
-              const isItemExist = await prisma.item.findUnique({
-                where: { id: bankAccount.item_id.toString() },
-              });
-
-              if (isItemExist) {
-                await prisma.bankAccount.create({
-                  data: {
-                    ...bankAccount,
-                    id: bankAccount.id.toString(),
-                    item_id: bankAccount.item_id.toString(),
-                  },
-                });
-
-                const transactions: TransactionsResponse =
-                  await responseTransactions.json();
-
-                if (transactions) {
-                  await prisma.transaction.createMany({
-                    data: transactions.resources.map((transaction) => ({
-                      ...transaction,
-                      id: transaction.id.toString(),
-                      account_id: transaction.account_id.toString(),
-                    })),
-                    skipDuplicates: true,
-                  });
-
-                  const transactionsByCategory =
-                    await classifyTransactionsByCategory(
-                      transactions.resources
-                    );
-
-                  await updateTransactionsCategory(transactionsByCategory);
-                }
-              }
-            }
+            await updateTransactionsCategory(transactionsByCategory);
           }
         } catch (error) {
           console.error("Error from item.account.created:", error);

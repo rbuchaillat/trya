@@ -1,5 +1,8 @@
 import {
   categorizeBudget,
+  getBudgetPlan,
+  getIncomeTransactions,
+  getIncomeValue,
   mergeExpenses,
 } from "@/features/category/category.utils";
 import { requiredCurrentUser } from "@/features/user/user.action";
@@ -50,6 +53,10 @@ export default async function Budget() {
   const wantsPercentage = Math.round((wants.total / totalExpenses) * 100);
   const savingsPercentage = Math.round((savings.total / totalExpenses) * 100);
 
+  const income = getIncomeValue(getIncomeTransactions(userTransactions));
+
+  const { bracket, plan } = getBudgetPlan(+income);
+
   return (
     <section className="bg-slate-100 rounded-2xl p-4 flex flex-col gap-y-5 min-h-[85vh]">
       <h1>
@@ -95,10 +102,19 @@ export default async function Budget() {
               </div>
             </div>
             <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
-              <h2>La répartition budgétaire recommandée</h2>
+              <div>
+                <h2>La répartition budgétaire recommandée*</h2>
+                <span className="text-xs text-slate-400">
+                  * Basé sur vos revenus (catégorie Revenus): {income} €
+                </span>
+              </div>
               <div className="mx-auto h-[200px]">
                 <Charts
-                  data={[{ value: 50 }, { value: 30 }, { value: 20 }]}
+                  data={[
+                    { value: bracket.needs },
+                    { value: bracket.wants },
+                    { value: bracket.savings },
+                  ]}
                   colors={[
                     "oklch(.707 .165 254.624)",
                     "oklch(.792 .209 151.711)",
@@ -109,15 +125,15 @@ export default async function Budget() {
               <div className="grid gap-1 text-xs">
                 <div className="flex gap-2 items-center">
                   <div className="size-3 rounded-full bg-blue-400" /> Dépenses
-                  pour vos besoins (50%)
+                  pour vos besoins ({bracket.needs}%)
                 </div>
                 <div className="flex gap-2 items-center">
                   <div className="size-3 rounded-full bg-green-400" /> Dépenses
-                  dédiés à vos envies (30%)
+                  dédiés à vos envies ({bracket.wants}%)
                 </div>
                 <div className="flex gap-2 items-center">
                   <div className="size-3 rounded-full bg-yellow-400" /> Dépenses
-                  pour votre épargne (20%)
+                  pour votre épargne ({bracket.savings}%)
                 </div>
               </div>
             </div>
@@ -131,7 +147,7 @@ export default async function Budget() {
               <div className="grid gap-y-2">
                 <strong className="flex gap-3 items-center">
                   <div className="size-4 rounded-full bg-yellow-400" /> Dépenses
-                  pour votre épargne ({savings.total}€)
+                  pour votre épargne ({savings.total}€/{plan.savings}€)
                 </strong>
                 <div className="grid gap-y-0.5">
                   {mergeExpenses(savings.expenses).map(
@@ -149,7 +165,7 @@ export default async function Budget() {
               <div className="grid gap-y-2">
                 <strong className="flex gap-3 items-center">
                   <div className="size-4 rounded-full bg-green-400" /> Dépenses
-                  pour vos envies ({wants.total}€)
+                  pour vos envies ({wants.total}€/{plan.wants}€)
                 </strong>
                 <div className="grid gap-y-0.5">
                   {mergeExpenses(wants.expenses).map((wantExpense, index) => {
@@ -165,7 +181,7 @@ export default async function Budget() {
               <div className="grid gap-y-2">
                 <strong className="flex gap-3 items-center">
                   <div className="size-4 rounded-full bg-blue-400" /> Dépenses
-                  pour vos besoins ({needs.total}€)
+                  pour vos besoins ({needs.total}€/{plan.needs}€)
                 </strong>
                 <div className="grid gap-y-0.5">
                   {mergeExpenses(needs.expenses).map((needExpense, index) => {

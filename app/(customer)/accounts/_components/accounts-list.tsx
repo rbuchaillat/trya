@@ -52,7 +52,7 @@ export const AccountsList = async () => {
                   await deleteItem({ id: item.id });
                 }}
               >
-                <Button variant="outline" size="icon">
+                <Button type="submit" variant="outline" size="icon">
                   <Trash2Icon />
                 </Button>
               </form>

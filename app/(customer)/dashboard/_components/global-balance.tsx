@@ -16,9 +16,10 @@ export const GlobalBalance = async () => {
     (item) => item.bankAccounts
   );
 
-  const totalBalance = bankAccounts?.reduce((accumulator, currentValue) => {
-    return accumulator + (currentValue.balance || 0);
-  }, 0);
+  const totalBalance = bankAccounts?.reduce(
+    (accumulator, currentValue) => accumulator + (currentValue.balance || 0),
+    0
+  );
 
   return (
     <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
