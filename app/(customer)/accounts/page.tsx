@@ -13,7 +13,14 @@ import { RefreshBankButton } from "./_components/refresh-bank-button";
 export default async function Accounts() {
   const user = await requiredCurrentUser();
 
-  if (!user.bridgeId) return null;
+  if (!user.bridgeId) {
+    return (
+      <section className="grid gap-y-5 p-4">
+        <h1>Mes comptes bancaires</h1>
+        <AddBankButton />
+      </section>
+    );
+  }
 
   const items = await prisma.item.findMany({
     where: { userId: user.bridgeId },
