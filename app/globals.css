@@ -3,10 +3,10 @@
 @theme {
   --color-popover: hsl(0 0% 100%);
   --color-popover-foreground: hsl(0 0% 3.9%);
-  --color-primary: hsl(0 0% 9%);
+  --color-primary: oklch(0.765 0.177 163.223);
   --color-primary-foreground: hsl(0 0% 98%);
-  --color-secondary: hsl(0 0% 96.1%)
-  --color-secondary-foreground: hsl(0 0% 9%);
+  --color-secondary: hsl(240 4.8% 95.9%);
+  --color-secondary-foreground: hsl(240 5.9% 10%);
   --color-muted: hsl(0 0% 96.1%);
   --color-muted-foreground: hsl(0 0% 45.1%);
   --color-accent: hsl(0 0% 96.1%);
@@ -19,8 +19,19 @@
 }
 
 @layer base {
+  * {
+    border-color: var(--color-border);
+    outline-color: color-mix(in oklab, var(--color-ring));
+  }
   body {
     font-family: var(--font-nunito), Helvetica, sans-serif;
     letter-spacing: 0.5px;
+  }
+  h1,
+  h2 {
+    font-family: var(--font-poppins), sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    line-height: 1;
   }
 }

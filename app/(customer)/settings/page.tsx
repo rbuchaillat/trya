@@ -3,7 +3,7 @@ import { deleteUser } from "@/features/bridge/bridge.action";
 
 export default async function Dashboard() {
   return (
-    <section className="bg-slate-100 rounded-2xl p-4 flex flex-col gap-y-5 min-h-[85vh]">
+    <section className="p-4 flex flex-col gap-y-5">
       <h1>Paramètres</h1>
       <form
         action={async () => {

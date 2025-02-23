@@ -9,7 +9,7 @@ export function SignOutButton() {
         await signOutAction();
       }}
     >
-      <Button type="submit" variant="link">
+      <Button type="submit" variant="ghost">
         Se déconnecter
       </Button>
     </form>

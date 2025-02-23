@@ -50,7 +50,7 @@ export function categorizeBudget(userTransactions: UserTransactions) {
   userTransactions.items.forEach((item) =>
     item.bankAccounts.forEach((bankAccount) =>
       bankAccount.transactions.forEach((transaction) => {
-        if (!transaction.category) return;
+        if (!transaction.category || transaction.amount > 0) return;
         const category = categorizeTransaction(transaction);
         if (category) budget[category].push(transaction);
       })
@@ -80,10 +80,12 @@ export function mergeExpenses(expenses: TransactionWithCategory[]) {
     }
   });
 
-  const result = Object.entries(totalExpenses).map(([description, total]) => ({
-    clean_description: description,
-    amount: total,
-  }));
+  const result = Object.entries(totalExpenses)
+    .map(([description, total]) => ({
+      clean_description: description,
+      amount: total,
+    }))
+    .sort((a, b) => a.amount - b.amount);
 
   return result;
 }

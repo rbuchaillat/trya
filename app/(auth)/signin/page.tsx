@@ -12,7 +12,7 @@ export default async function Signin() {
         <SignInButton />
         <Link
           href={ROUTES.SIGNUP}
-          className={buttonVariants({ variant: "link" })}
+          className={buttonVariants({ variant: "ghost" })}
         >
           <ChevronRightIcon /> S&apos;inscrire
         </Link>

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { badgeVariants } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { SignOutButton } from "@/components/utils/signout-button";
 import { requiredCurrentUser } from "@/features/user/user.action";
@@ -14,29 +13,13 @@ export default async function CustomerLayout({
   const user = await requiredCurrentUser();
 
   return (
-    <main className="text-slate-600">
-      <header className="flex justify-between items-center p-4">
-        <Link
-          href={ROUTES.DASHBOARD}
-          className={badgeVariants({ variant: "outline" })}
-        >
+    <main className="text-slate-600 flex">
+      <div className="basis-1/6 p-4 gap-y-4 flex flex-col">
+        <Link href={ROUTES.DASHBOARD} className="font-black text-2xl py-1">
           Trya
         </Link>
-        <div className="flex gap-x-2">
-          {user.image && (
-            <Avatar>
-              <AvatarImage src={user.image} />
-              <AvatarFallback>
-                {user.name?.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          )}
-          <SignOutButton />
-        </div>
-      </header>
-      <div className="flex">
-        <nav className="basis-1/6 p-4">
-          <ul className="grid gap-y-3">
+        <nav>
+          <ul className="grid gap-y-3 py-4">
             <li>
               <Link
                 href={ROUTES.ACCOUNTS}
@@ -63,7 +46,20 @@ export default async function CustomerLayout({
             </li>
           </ul>
         </nav>
-        <div className="basis-5/6 p-4">{children}</div>
+      </div>
+      <div className="basis-5/6 p-4 gap-y-4 flex flex-col bg-slate-100 min-h-screen">
+        <div className="flex gap-x-2 justify-end">
+          {user.image && (
+            <Avatar>
+              <AvatarImage src={user.image} />
+              <AvatarFallback>
+                {user.name?.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          <SignOutButton />
+        </div>
+        {children}
       </div>
     </main>
   );

@@ -58,10 +58,10 @@ export default async function Budget() {
   const { bracket, plan } = getBudgetPlan(+income);
 
   return (
-    <section className="bg-slate-100 rounded-2xl p-4 flex flex-col gap-y-5 min-h-[85vh]">
+    <section className="p-4 flex flex-col gap-y-5">
       <h1>
         Gestion du budget de{" "}
-        <strong className="capitalize">
+        <strong className="underline">
           {formatDateWithMonth(
             new Date(new Date().setMonth(new Date().getMonth() - 1))
           )}
@@ -104,8 +104,8 @@ export default async function Budget() {
             <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
               <div>
                 <h2>La répartition budgétaire recommandée*</h2>
-                <span className="text-xs text-slate-400">
-                  * Basé sur vos revenus (catégorie Revenus): {income} €
+                <span className="text-xs text-slate-500">
+                  *Basé sur vos revenus ({income}€)
                 </span>
               </div>
               <div className="mx-auto h-[200px]">
@@ -143,7 +143,7 @@ export default async function Budget() {
               Récapitulatif des dépenses (
               {(needs.total + wants.total + savings.total).toFixed(2)}€)
             </h2>
-            <div className="grid gap-y-4">
+            <div className="grid gap-y-4 text-xs">
               <div className="grid gap-y-2">
                 <strong className="flex gap-3 items-center">
                   <div className="size-4 rounded-full bg-yellow-400" /> Dépenses

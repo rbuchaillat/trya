@@ -38,11 +38,7 @@ export const RefreshBankButton = ({ itemId }: { itemId: number }) => {
       onClick={() => (window.location.href = url)}
       className="group/refresh"
     >
-      <RefreshCwIcon
-        width={16}
-        height={16}
-        className="text-slate-400 group-hover/refresh:text-slate-600"
-      />
+      <RefreshCwIcon className="text-slate-600" />
     </Button>
   );
 };
