@@ -1,3 +1,4 @@
+import { ChartPieIcon, HandCoinsIcon } from "lucide-react";
 import {
   categorizeBudget,
   getBudgetPlan,
@@ -68,10 +69,34 @@ export default async function Budget() {
         </strong>
       </h1>
       {userTransactions.items.length !== 0 && (
-        <div className="flex flex-col gap-y-5">
+        <div className="flex flex-col gap-8">
           <div className="grid grid-cols-2 gap-8">
-            <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
-              <h2>Votre répartition budgétaire</h2>
+            <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2 items-center">
+                  <div className="bg-slate-100 p-1.5 rounded-md">
+                    <ChartPieIcon size={14} className="text-slate-500" />
+                  </div>
+                  <span className="text-slate-800 font-medium">
+                    Votre répartition budgétaire
+                  </span>
+                </div>
+                <div className="flex gap-2 text-xs">
+                  <div className="w-6" />
+                  <div className="flex gap-1 items-center">
+                    <div className="size-3 rounded-full bg-blue-400" /> Besoins
+                    ({needsPercentage}%)
+                  </div>
+                  <div className="flex gap-1 items-center">
+                    <div className="size-3 rounded-full bg-green-400" /> Envies
+                    ({wantsPercentage}%)
+                  </div>
+                  <div className="flex gap-1 items-center">
+                    <div className="size-3 rounded-full bg-yellow-400" />{" "}
+                    Épargne ({savingsPercentage}%)
+                  </div>
+                </div>
+              </div>
               <div className="mx-auto h-[200px]">
                 <Charts
                   data={[
@@ -86,27 +111,36 @@ export default async function Budget() {
                   ]}
                 />
               </div>
-              <div className="grid gap-1 text-xs">
-                <div className="flex gap-2 items-center">
-                  <div className="size-3 rounded-full bg-blue-400" /> Dépenses
-                  pour vos besoins ({needsPercentage}%)
-                </div>
-                <div className="flex gap-2 items-center">
-                  <div className="size-3 rounded-full bg-green-400" /> Dépenses
-                  dédiés à vos envies ({wantsPercentage}%)
-                </div>
-                <div className="flex gap-2 items-center">
-                  <div className="size-3 rounded-full bg-yellow-400" /> Dépenses
-                  pour votre épargne ({savingsPercentage}%)
-                </div>
-              </div>
             </div>
             <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
-              <div>
-                <h2>La répartition budgétaire recommandée*</h2>
-                <span className="text-xs text-slate-500">
-                  *Basé sur vos revenus ({income}€)
-                </span>
+              <div className="flex gap-2 items-start">
+                <div className="bg-slate-100 p-1.5 rounded-md">
+                  <ChartPieIcon size={14} className="text-slate-500" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-slate-800 font-medium">
+                    Répartition budgétaire recommandée
+                  </span>
+                  <span className="text-xs text-slate-500 italic">
+                    basé sur vos revenus:{" "}
+                    <span className="font-bold">{income} €</span>
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2 text-xs">
+                <div className="w-6" />
+                <div className="flex gap-1 items-center">
+                  <div className="size-3 rounded-full bg-blue-400" /> Besoins (
+                  {bracket.needs}%)
+                </div>
+                <div className="flex gap-1 items-center">
+                  <div className="size-3 rounded-full bg-green-400" /> Envies (
+                  {bracket.wants}%)
+                </div>
+                <div className="flex gap-1 items-center">
+                  <div className="size-3 rounded-full bg-yellow-400" /> Épargne
+                  ({bracket.savings}%)
+                </div>
               </div>
               <div className="mx-auto h-[200px]">
                 <Charts
@@ -122,76 +156,79 @@ export default async function Budget() {
                   ]}
                 />
               </div>
-              <div className="grid gap-1 text-xs">
-                <div className="flex gap-2 items-center">
-                  <div className="size-3 rounded-full bg-blue-400" /> Dépenses
-                  pour vos besoins ({bracket.needs}%)
-                </div>
-                <div className="flex gap-2 items-center">
-                  <div className="size-3 rounded-full bg-green-400" /> Dépenses
-                  dédiés à vos envies ({bracket.wants}%)
-                </div>
-                <div className="flex gap-2 items-center">
-                  <div className="size-3 rounded-full bg-yellow-400" /> Dépenses
-                  pour votre épargne ({bracket.savings}%)
-                </div>
-              </div>
             </div>
           </div>
-          <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-3">
-            <h2>
-              Récapitulatif des dépenses (
-              {(needs.total + wants.total + savings.total).toFixed(2)}€)
-            </h2>
-            <div className="grid gap-y-4 text-xs">
-              <div className="grid gap-y-2">
-                <strong className="flex gap-3 items-center">
-                  <div className="size-4 rounded-full bg-yellow-400" /> Dépenses
-                  pour votre épargne ({savings.total}€/{plan.savings}€)
+          <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-4">
+            <div className="flex gap-2 items-center">
+              <div className="bg-slate-100 p-1.5 rounded-md">
+                <HandCoinsIcon size={14} className="text-slate-500" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-slate-800 font-medium">
+                  Récapitulatif des dépenses:{" "}
+                  <span className="font-bold">
+                    {(needs.total + wants.total + savings.total).toFixed(2)} €
+                  </span>
+                </span>
+                <span className="text-xs text-slate-500 italic">
+                  Comparez vos dépenses réelles avec celles recommandées.
+                  Visualisez rapidement si vous êtes sur la bonne voie pour une
+                  gestion financière équilibrée !
+                </span>
+              </div>
+            </div>
+            <div className="grid gap-10 grid-cols-3">
+              <div className="flex flex-col gap-y-2">
+                <strong className="flex gap-2 items-center text-sm">
+                  <div className="size-3 rounded-full bg-blue-400" />
+                  Besoins: {needs.total} € / {plan.needs} €
                 </strong>
-                <div className="grid gap-y-0.5">
+                <div className="grid gap-y-0.5 text-xs">
+                  {mergeExpenses(needs.expenses).map((needExpense, index) => {
+                    return (
+                      <div key={index} className="border-b border-gray-100 p-1">
+                        {needExpense.clean_description}:{" "}
+                        {Math.abs(needExpense.amount).toFixed(2)} €
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex flex-col gap-y-2">
+                <strong className="flex gap-2 items-center text-sm">
+                  <div className="size-3 rounded-full bg-green-400" /> Envies:{" "}
+                  {wants.total} € / {plan.wants} €
+                </strong>
+                <div className="grid gap-y-0.5 text-xs">
+                  {mergeExpenses(wants.expenses).map((wantExpense, index) => {
+                    return (
+                      <div key={index} className="border-b border-gray-100 p-1">
+                        {wantExpense.clean_description}:{" "}
+                        {Math.abs(wantExpense.amount).toFixed(2)} €
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex flex-col gap-y-2">
+                <strong className="flex gap-2 items-center text-sm">
+                  <div className="size-3 rounded-full bg-yellow-400" /> Épargne:{" "}
+                  {savings.total} € / {plan.savings} €
+                </strong>
+                <div className="grid gap-y-0.5 text-xs">
                   {mergeExpenses(savings.expenses).map(
                     (savingExpense, index) => {
                       return (
-                        <div key={index}>
+                        <div
+                          key={index}
+                          className="border-b border-gray-100 p-1"
+                        >
                           {savingExpense.clean_description}:{" "}
-                          {Math.abs(savingExpense.amount).toFixed(2)}€
+                          {Math.abs(savingExpense.amount).toFixed(2)} €
                         </div>
                       );
                     }
                   )}
-                </div>
-              </div>
-              <div className="grid gap-y-2">
-                <strong className="flex gap-3 items-center">
-                  <div className="size-4 rounded-full bg-green-400" /> Dépenses
-                  pour vos envies ({wants.total}€/{plan.wants}€)
-                </strong>
-                <div className="grid gap-y-0.5">
-                  {mergeExpenses(wants.expenses).map((wantExpense, index) => {
-                    return (
-                      <div key={index}>
-                        {wantExpense.clean_description}:{" "}
-                        {Math.abs(wantExpense.amount).toFixed(2)}€
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="grid gap-y-2">
-                <strong className="flex gap-3 items-center">
-                  <div className="size-4 rounded-full bg-blue-400" /> Dépenses
-                  pour vos besoins ({needs.total}€/{plan.needs}€)
-                </strong>
-                <div className="grid gap-y-0.5">
-                  {mergeExpenses(needs.expenses).map((needExpense, index) => {
-                    return (
-                      <div key={index}>
-                        {needExpense.clean_description}:{" "}
-                        {Math.abs(needExpense.amount).toFixed(2)}€
-                      </div>
-                    );
-                  })}
                 </div>
               </div>
             </div>

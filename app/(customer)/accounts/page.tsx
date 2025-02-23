@@ -23,7 +23,7 @@ export default async function Accounts() {
   return (
     <section className="grid gap-y-5 p-4">
       <div className="flex gap-4 items-center justify-between">
-        <h1>Mes comptes</h1>
+        <h1>Mes comptes bancaires</h1>
       </div>
       <div className="grid gap-y-3">
         {items?.map(async (item) => {
