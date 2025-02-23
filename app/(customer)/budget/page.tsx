@@ -8,8 +8,33 @@ import {
 } from "@/features/category/category.utils";
 import { requiredCurrentUser } from "@/features/user/user.action";
 import { prisma } from "@/lib/prisma";
+import { cn } from "@/lib/utils";
 import { formatDateWithMonth, getLastMonthDates } from "@/utils/date";
 import { Charts } from "./_components/charts";
+
+function isWithinLimitOrSlightlyAbove(current: number, total: number): boolean {
+  return current <= total || current <= total * 1.05;
+}
+
+function isModeratelyAboveLimit(current: number, total: number): boolean {
+  return current > total * 1.05 && current <= total * 1.15;
+}
+
+function isSignificantlyAboveLimit(current: number, total: number): boolean {
+  return current > total * 1.15;
+}
+
+function isAboveOrNotTooBelow(current: number, total: number): boolean {
+  return current >= total || current >= total * 0.95;
+}
+
+function isModeratelyBelow(current: number, total: number): boolean {
+  return current < total * 0.95 && current >= total * 0.85;
+}
+
+function isSignificantlyBelow(current: number, total: number): boolean {
+  return current < total * 0.85;
+}
 
 export default async function Budget() {
   const user = await requiredCurrentUser();
@@ -181,7 +206,26 @@ export default async function Budget() {
               <div className="flex flex-col gap-y-2">
                 <strong className="flex gap-2 items-center text-sm">
                   <div className="size-3 rounded-full bg-blue-400" />
-                  Besoins: {needs.total} € / {plan.needs} €
+                  Besoins:{" "}
+                  <span
+                    className={cn({
+                      "text-green-500": isWithinLimitOrSlightlyAbove(
+                        needs.total,
+                        plan.needs
+                      ),
+                      "text-orange-500": isModeratelyAboveLimit(
+                        needs.total,
+                        plan.needs
+                      ),
+                      "text-red-500": isSignificantlyAboveLimit(
+                        needs.total,
+                        plan.needs
+                      ),
+                    })}
+                  >
+                    {needs.total} €
+                  </span>{" "}
+                  / {plan.needs} €
                 </strong>
                 <div className="grid gap-y-0.5 text-xs">
                   {mergeExpenses(needs.expenses).map((needExpense, index) => {
@@ -197,7 +241,25 @@ export default async function Budget() {
               <div className="flex flex-col gap-y-2">
                 <strong className="flex gap-2 items-center text-sm">
                   <div className="size-3 rounded-full bg-green-400" /> Envies:{" "}
-                  {wants.total} € / {plan.wants} €
+                  <span
+                    className={cn({
+                      "text-green-500": isWithinLimitOrSlightlyAbove(
+                        wants.total,
+                        plan.wants
+                      ),
+                      "text-orange-500": isModeratelyAboveLimit(
+                        wants.total,
+                        plan.wants
+                      ),
+                      "text-red-500": isSignificantlyAboveLimit(
+                        wants.total,
+                        plan.wants
+                      ),
+                    })}
+                  >
+                    {wants.total} €
+                  </span>{" "}
+                  / {plan.wants} €
                 </strong>
                 <div className="grid gap-y-0.5 text-xs">
                   {mergeExpenses(wants.expenses).map((wantExpense, index) => {
@@ -213,7 +275,25 @@ export default async function Budget() {
               <div className="flex flex-col gap-y-2">
                 <strong className="flex gap-2 items-center text-sm">
                   <div className="size-3 rounded-full bg-yellow-400" /> Épargne:{" "}
-                  {savings.total} € / {plan.savings} €
+                  <span
+                    className={cn({
+                      "text-green-500": isAboveOrNotTooBelow(
+                        savings.total,
+                        plan.savings
+                      ),
+                      "text-orange-500": isModeratelyBelow(
+                        savings.total,
+                        plan.savings
+                      ),
+                      "text-red-500": isSignificantlyBelow(
+                        savings.total,
+                        plan.savings
+                      ),
+                    })}
+                  >
+                    {savings.total} €
+                  </span>{" "}
+                  / {plan.savings} €
                 </strong>
                 <div className="grid gap-y-0.5 text-xs">
                   {mergeExpenses(savings.expenses).map(
