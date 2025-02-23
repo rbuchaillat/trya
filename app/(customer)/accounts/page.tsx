@@ -17,7 +17,9 @@ export default async function Accounts() {
     return (
       <section className="grid gap-y-5 p-4">
         <h1>Mes comptes bancaires</h1>
-        <AddBankButton />
+        <div>
+          <AddBankButton />
+        </div>
       </section>
     );
   }
