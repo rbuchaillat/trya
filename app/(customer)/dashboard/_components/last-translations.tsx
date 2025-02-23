@@ -66,7 +66,7 @@ export const LastTranslations = async () => {
                   {transaction.clean_description}
                 </td>
                 <td
-                  className={cn("text-right px-2.5 font-bold", {
+                  className={cn("text-right px-2.5 font-bold w-24", {
                     "text-emerald-400": transaction.amount > 0,
                   })}
                 >
