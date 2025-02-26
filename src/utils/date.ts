@@ -5,10 +5,6 @@ export const formatDateWithDayAndShortMonth = (date: Date) => {
   }).format(date);
 };
 
-export const formatDateWithMonth = (date: Date) => {
-  return new Intl.DateTimeFormat("fr-FR", { month: "long" }).format(date);
-};
-
 export const formatDateWithShortMonth = (date: Date) => {
   return new Intl.DateTimeFormat("fr-FR", { month: "short" }).format(date);
 };

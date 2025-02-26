@@ -6,7 +6,7 @@ import {
   WANTS_CATEGORIES,
 } from "./category.constant";
 
-type UserTransactions = User & {
+export type UserTransactions = User & {
   items: ItemWithBankAccounts[];
 };
 

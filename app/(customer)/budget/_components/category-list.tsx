@@ -20,6 +20,7 @@ export const CategoryList = () => {
   const month = searchParams.get("month") ?? new Date().getMonth() + 1;
 
   const [categories, setCategories] = useState<CategoryWithTransactions[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const categoriesWithTransactionsValueSorted = categories
     .map((category) => ({
@@ -41,17 +42,26 @@ export const CategoryList = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const user = await requiredCurrentUser();
-      if (!user.bridgeId) return;
-
-      const categories = await getCategoriesWithTransactions({
-        userId: user.bridgeId,
-        ...getMonthDates(new Date(year + "-" + month)),
-      });
-      setCategories(categories);
+      try {
+        const user = await requiredCurrentUser();
+        if (!user.bridgeId) return;
+        const categories = await getCategoriesWithTransactions({
+          userId: user.bridgeId,
+          ...getMonthDates(new Date(year + "-" + month)),
+        });
+        setCategories(categories);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, [year, month]);
+
+  if (loading) {
+    return <p>Chargement...</p>;
+  }
 
   return (
     <div>
@@ -89,9 +99,11 @@ export const CategoryList = () => {
                 <div className="grid">
                   <div className="text-sm">{category.name}</div>
                   <div className="text-xs text-slate-400">
-                    {`${((category.value / totalAmount) * 100).toFixed(2)}% - ${
-                      category.transactions.length
-                    } transaction${
+                    {`${
+                      totalAmount !== 0
+                        ? ((category.value / totalAmount) * 100).toFixed(2)
+                        : 0
+                    }% - ${category.transactions.length} transaction${
                       category.transactions.length > 1 ? "s" : ""
                     }`}
                   </div>

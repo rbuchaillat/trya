@@ -2,16 +2,18 @@ import { parseAsInteger, useQueryState } from "nuqs";
 
 const TODAY = new Date();
 
-export function useCalendarNavigation() {
+export function useCalendarNavigation(options?: { date?: Date }) {
+  const date = options?.date ?? new Date();
+
   const [year, setYear] = useQueryState(
     "year",
-    parseAsInteger.withDefault(TODAY.getFullYear()).withOptions({
+    parseAsInteger.withDefault(date.getFullYear()).withOptions({
       clearOnDefault: false,
     })
   );
   const [month, setMonth] = useQueryState(
     "month",
-    parseAsInteger.withDefault(TODAY.getMonth() + 1).withOptions({
+    parseAsInteger.withDefault(date.getMonth() + 1).withOptions({
       clearOnDefault: false,
     })
   );

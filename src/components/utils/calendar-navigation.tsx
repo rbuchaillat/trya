@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useCalendarNavigation } from "@/hooks/use-calendar-navigation";
 import { formatDateWithShortMonth } from "@/utils/date";
 
-export const CalendarNavigation = () => {
+export const CalendarNavigation = ({ date }: { date?: Date }) => {
   const { year, month, isNextMonthDisabled, nextMonth, previousMonth } =
-    useCalendarNavigation();
+    useCalendarNavigation({ date });
 
   return (
     <div className="flex gap-x-5 items-center">

@@ -152,3 +152,33 @@ export const updateTransactionsCategory = async (
     console.error("Database update error:", error);
   }
 };
+
+export const getTransactionsByUserId = async ({
+  userId,
+  startDate,
+  endDate,
+}: {
+  userId: string;
+  startDate: string;
+  endDate: string;
+}) => {
+  const userTransactions = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      items: {
+        include: {
+          bankAccounts: {
+            where: { type: "checking" },
+            include: {
+              transactions: {
+                where: { date: { gte: startDate, lte: endDate } },
+                include: { category: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  return userTransactions;
+};

@@ -1,4 +1,4 @@
-import { CalendarNavigation } from "./_components/calendar-navigation";
+import { CalendarNavigation } from "@/components/utils/calendar-navigation";
 import { CategoryList } from "./_components/category-list";
 
 export default function Budget() {
