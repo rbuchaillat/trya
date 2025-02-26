@@ -29,7 +29,7 @@ export const CategoryChip = ({
       <div
         className={cn(
           "size-4 rounded-full text-10 text-white flex items-center justify-center shrink-0 font-black",
-          COLORS[label]
+          COLORS[label].cn
         )}
       >
         {label.charAt(0)}

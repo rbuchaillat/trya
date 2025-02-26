@@ -1,3 +1,4 @@
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { Metadata } from "next";
 import { Nunito, Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
@@ -27,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={`${nunito.className} ${poppins.variable} antialiased`}>
-        {children}
+        <NuqsAdapter>{children}</NuqsAdapter>
         <Toaster />
       </body>
     </html>

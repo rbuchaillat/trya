@@ -1,15 +1,9 @@
 "use server";
 
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ROUTES } from "@/types/routes";
-import {
-  actionClient,
-  authActionClient,
-  authActionClientWithAccessToken,
-} from "@/lib/safe-action";
 import {
   AuthorizationTokenResponse,
   CreateConnectSessionResponse,
@@ -23,13 +17,13 @@ const defaultHeaders = {
   "Client-Secret": process.env.BRIDGE_CLIENT_SECRET!,
 };
 
-export const createUser = authActionClient.action(async ({ ctx: { user } }) => {
+export const createUser = async (userId: string) => {
   const response = await fetch(
     "https://api.bridgeapi.io/v3/aggregation/users",
     {
       method: "POST",
       headers: { ...defaultHeaders, "Content-Type": "application/json" },
-      body: JSON.stringify({ external_user_id: user.id }),
+      body: JSON.stringify({ external_user_id: userId }),
     }
   );
 
@@ -45,170 +39,181 @@ export const createUser = authActionClient.action(async ({ ctx: { user } }) => {
 
   await prisma.user.update({
     data: { bridgeId: data.uuid },
-    where: { id: user.id },
+    where: { id: userId },
   });
 
   return data;
-});
+};
 
-export const authorizationToken = authActionClient.action(
-  async ({ ctx: { user } }) => {
-    const response = await fetch(
-      "https://api.bridgeapi.io/v3/aggregation/authorization/token",
-      {
-        method: "POST",
-        headers: { ...defaultHeaders, "Content-Type": "application/json" },
-        body: JSON.stringify({ external_user_id: user.id }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
+export const authorizationToken = async (userId: string) => {
+  const response = await fetch(
+    "https://api.bridgeapi.io/v3/aggregation/authorization/token",
+    {
+      method: "POST",
+      headers: { ...defaultHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify({ external_user_id: userId }),
     }
+  );
 
-    const data: AuthorizationTokenResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error getting authorization token");
-    }
-
-    return data;
+  if (!response.ok) {
+    throw new Error(`Error ${response.status} : ${response.statusText}`);
   }
-);
 
-export const createConnectSession = authActionClientWithAccessToken.action(
-  async ({ ctx: { user, accessToken } }) => {
-    const response = await fetch(
-      "https://api.bridgeapi.io/v3/aggregation/connect-sessions",
-      {
-        method: "POST",
-        headers: {
-          ...defaultHeaders,
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          user_email: user.email,
-        }),
-      }
-    );
+  const data: AuthorizationTokenResponse = await response.json();
 
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
-
-    const data: CreateConnectSessionResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error creating connect session");
-    }
-
-    return data;
+  if (!data) {
+    throw new Error("Error getting authorization token");
   }
-);
 
-export const deleteItem = authActionClientWithAccessToken
-  .schema(z.object({ id: z.string() }))
-  .action(async ({ ctx: { accessToken }, parsedInput: { id } }) => {
-    const response = await fetch(
-      `https://api.bridgeapi.io/v3/aggregation/items/${id}`,
-      {
-        method: "DELETE",
-        headers: { ...defaultHeaders, Authorization: `Bearer ${accessToken}` },
-      }
-    );
+  return data;
+};
 
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
+export const storeAccessToken = async (userId: string) => {
+  const data = await authorizationToken(userId);
 
-    await prisma.item.delete({ where: { id } });
-
-    revalidatePath(ROUTES.ACCOUNTS);
-  });
-
-export const deleteUser = authActionClientWithAccessToken.action(
-  async ({ ctx: { accessToken, user } }) => {
-    const response = await fetch(
-      `https://api.bridgeapi.io/v3/aggregation/users/${user.bridgeId}`,
-      {
-        method: "DELETE",
-        headers: { ...defaultHeaders, Authorization: `Bearer ${accessToken}` },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
-
-    await prisma.user.delete({ where: { id: user.id } });
-
-    redirect(ROUTES.HOME);
+  if (data) {
+    await prisma.bridgeToken.create({
+      data: {
+        access_token: data.access_token,
+        expires_at: data.expires_at,
+        userId,
+      },
+    });
   }
-);
 
-export const refreshBankAccount = authActionClientWithAccessToken
-  .schema(z.object({ id: z.number() }))
-  .action(async ({ ctx: { accessToken }, parsedInput: { id } }) => {
-    const response = await fetch(
-      "https://api.bridgeapi.io/v3/aggregation/connect-sessions",
-      {
-        method: "POST",
-        headers: {
-          ...defaultHeaders,
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ item_id: id }),
-      }
-    );
+  return data;
+};
 
-    if (!response.ok) {
-      throw new Error(`Error ${response.status} : ${response.statusText}`);
-    }
+export const refreshAccessToken = async (
+  userId: string,
+  userTokenId: number
+) => {
+  const data = await authorizationToken(userId);
 
-    const data: CreateConnectSessionResponse = await response.json();
-
-    if (!data) {
-      throw new Error("Error creating connect session");
-    }
-
-    return data;
-  });
-
-/*
-  These functions manage the lifecycle of the access token.
-*/
-
-export const storeAccessToken = authActionClient.action(
-  async ({ ctx: { user } }) => {
-    const { data } = (await authorizationToken()) ?? {};
-
-    if (data) {
-      await prisma.bridgeToken.create({
-        data: {
-          access_token: data.access_token,
-          expires_at: data.expires_at,
-          userId: user.id,
-        },
-      });
-    }
-
-    return data;
+  if (data) {
+    await prisma.bridgeToken.update({
+      data: { access_token: data.access_token, expires_at: data.expires_at },
+      where: { id: userTokenId },
+    });
   }
-);
 
-export const refreshAccessToken = actionClient
-  .schema(z.object({ userTokenId: z.number() }))
-  .action(async ({ parsedInput: { userTokenId } }) => {
-    const { data } = (await authorizationToken()) ?? {};
+  return data;
+};
 
-    if (data) {
-      await prisma.bridgeToken.update({
-        data: { access_token: data.access_token, expires_at: data.expires_at },
-        where: { id: userTokenId },
-      });
+export const getAccessToken = async (userId: string) => {
+  const userToken = await prisma.bridgeToken.findFirst({ where: { userId } });
+
+  if (!userToken) {
+    const response = await storeAccessToken(userId);
+    return response.access_token;
+  }
+
+  const now = new Date();
+  const expiresAt = new Date(userToken.expires_at);
+
+  if (expiresAt <= now) {
+    const response = await refreshAccessToken(userId, userToken.id);
+    return response.access_token;
+  }
+
+  return userToken.access_token;
+};
+
+export const createConnectSession = async (
+  userEmail: string,
+  accessToken: string
+) => {
+  const response = await fetch(
+    "https://api.bridgeapi.io/v3/aggregation/connect-sessions",
+    {
+      method: "POST",
+      headers: {
+        ...defaultHeaders,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        user_email: userEmail,
+      }),
     }
+  );
 
-    return data;
-  });
+  if (!response.ok) {
+    throw new Error(`Error ${response.status} : ${response.statusText}`);
+  }
+
+  const data: CreateConnectSessionResponse = await response.json();
+
+  if (!data) {
+    throw new Error("Error creating connect session");
+  }
+
+  return data;
+};
+
+export const deleteItem = async (id: string, accessToken: string) => {
+  const response = await fetch(
+    `https://api.bridgeapi.io/v3/aggregation/items/${id}`,
+    {
+      method: "DELETE",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${accessToken}` },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status} : ${response.statusText}`);
+  }
+
+  await prisma.item.delete({ where: { id } });
+
+  revalidatePath(ROUTES.ACCOUNTS);
+};
+
+export const deleteUser = async (
+  userId: string,
+  bridgeId: string,
+  accessToken: string
+) => {
+  const response = await fetch(
+    `https://api.bridgeapi.io/v3/aggregation/users/${bridgeId}`,
+    {
+      method: "DELETE",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${accessToken}` },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status} : ${response.statusText}`);
+  }
+
+  await prisma.user.delete({ where: { id: userId } });
+
+  redirect(ROUTES.HOME);
+};
+
+export const refreshBankAccount = async (id: number, accessToken: string) => {
+  const response = await fetch(
+    "https://api.bridgeapi.io/v3/aggregation/connect-sessions",
+    {
+      method: "POST",
+      headers: {
+        ...defaultHeaders,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ item_id: id }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status} : ${response.statusText}`);
+  }
+
+  const data: CreateConnectSessionResponse = await response.json();
+
+  if (!data) {
+    throw new Error("Error creating connect session");
+  }
+
+  return data;
+};

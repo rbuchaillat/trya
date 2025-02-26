@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
+  ChartPieIcon,
   HandCoinsIcon,
   LandmarkIcon,
   LayoutDashboardIcon,
@@ -56,7 +57,20 @@ export const Navigation = () => {
           >
             <HandCoinsIcon />
             <span className={cn(ROUTES.BUDGET === pathname && "font-bold")}>
-              Gestion de budget
+              Mon budget
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link
+            href={ROUTES.WARREN}
+            className={buttonVariants({
+              variant: ROUTES.WARREN === pathname ? "default" : "outline",
+            })}
+          >
+            <ChartPieIcon />
+            <span className={cn(ROUTES.WARREN === pathname && "font-bold")}>
+              Méthode 50/30/20
             </span>
           </Link>
         </li>

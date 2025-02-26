@@ -37,7 +37,7 @@ export function CategoryCommand({
                 <div
                   className={cn(
                     "size-4 rounded-full text-10 text-white flex items-center justify-center shrink-0 font-black",
-                    COLORS[category.name]
+                    COLORS[category.name].cn
                   )}
                 >
                   {category.name.charAt(0)}

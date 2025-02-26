@@ -5,6 +5,7 @@ import { requiredCurrentUser } from "@/features/user/user.action";
 import {
   createUser,
   createConnectSession,
+  getAccessToken,
 } from "@/features/bridge/bridge.action";
 import { Button } from "@/components/ui/button";
 
@@ -16,9 +17,10 @@ export const AddBankButton = () => {
     const initToBridge = async () => {
       try {
         const user = await requiredCurrentUser();
-        if (!user.bridgeId) await createUser();
-        const item = await createConnectSession();
-        if (item?.data?.url) setUrl(item.data.url);
+        if (!user.bridgeId) await createUser(user.id);
+        const accessToken = await getAccessToken(user.id);
+        const item = await createConnectSession(user.email, accessToken);
+        setUrl(item.url);
       } catch (err) {
         console.error(err);
       } finally {

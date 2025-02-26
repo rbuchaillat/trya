@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { refreshBankAccount } from "@/features/bridge/bridge.action";
+import {
+  getAccessToken,
+  refreshBankAccount,
+} from "@/features/bridge/bridge.action";
+import { requiredCurrentUser } from "@/features/user/user.action";
 
 export const RefreshBankButton = ({ itemId }: { itemId: number }) => {
   const [url, setUrl] = useState<string | null>(null);
@@ -12,8 +16,10 @@ export const RefreshBankButton = ({ itemId }: { itemId: number }) => {
   useEffect(() => {
     const syncToBridge = async () => {
       try {
-        const item = await refreshBankAccount({ id: itemId });
-        if (item?.data?.url) setUrl(item.data.url);
+        const user = await requiredCurrentUser();
+        const accessToken = await getAccessToken(user.id);
+        const item = await refreshBankAccount(itemId, accessToken);
+        setUrl(item.url);
       } catch (err) {
         console.error(err);
       } finally {

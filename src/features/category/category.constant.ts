@@ -27,34 +27,47 @@ export const WANTS_CATEGORIES = [
   "Abonnements",
   "Achats & Shopping",
   "Divers",
+  "Dons et charité",
   "Esthétique & Soins",
   "Loisirs & Sorties",
   "Restaurant",
   "Voyages",
 ];
 
-export const SAVINGS_CATEGORIES = [
-  "Dons et charité",
-  "Épargne et investissements",
-];
+export const SAVINGS_CATEGORIES = ["Épargne et investissements"];
 
-export const COLORS: Record<string, string> = {
-  Abonnements: "bg-orange-400",
-  Alimentation: "bg-amber-400",
-  Divers: "bg-slate-400",
-  Logement: "bg-stone-400",
-  Restaurant: "bg-amber-400",
-  Revenus: "bg-neutral-400",
-  Santé: "bg-teal-400",
-  Voyages: "bg-yellow-400",
-  "Achats & Shopping": "bg-red-400",
-  "Auto & Transports": "bg-blue-400",
-  "Dons et charité": "bg-cyan-400",
-  "Épargne et investissements": "bg-indigo-400",
-  "Esthétique & Soins": "bg-pink-400",
-  "Impôts & Taxes": "bg-green-400",
-  "Internet / Téléphone mobile": "bg-orange-400",
-  "Loisirs & Sorties": "bg-yellow-400",
-  "Virement interne": "bg-sky-400",
-  "Scolarité & Enfants": "bg-rose-400",
+export const COLORS: Record<string, { cn: string; oklch: string }> = {
+  Abonnements: { cn: "bg-orange-400", oklch: "oklch(.75 .183 55.934)" },
+  Alimentation: { cn: "bg-amber-400", oklch: "oklch(.828 .189 84.429)" },
+  Divers: { cn: "bg-slate-400", oklch: "oklch(.704 .04 256.788)" },
+  Logement: { cn: "bg-stone-400", oklch: "oklch(.709 .01 56.259)" },
+  Restaurant: { cn: "bg-amber-400", oklch: "oklch(.828 .189 84.429)" },
+  Revenus: { cn: "bg-neutral-400", oklch: "oklch(.708 0 0)" },
+  Santé: { cn: "bg-teal-400", oklch: "oklch(.777 .152 181.912)" },
+  Voyages: { cn: "bg-yellow-400", oklch: "oklch(.852 .199 91.936)" },
+  "Achats & Shopping": { cn: "bg-red-400", oklch: "oklch(.704 .191 22.216)" },
+  "Auto & Transports": { cn: "bg-blue-400", oklch: "oklch(.707 .165 254.624)" },
+  "Dons et charité": { cn: "bg-cyan-400", oklch: "oklch(.789 .154 211.53)" },
+  "Épargne et investissements": {
+    cn: "bg-indigo-400",
+    oklch: "oklch(.673 .182 276.935)",
+  },
+  "Esthétique & Soins": {
+    cn: "bg-pink-400",
+    oklch: "oklch(.718 .202 349.761)",
+  },
+  "Impôts & Taxes": { cn: "bg-green-400", oklch: "oklch(.792 .209 151.711)" },
+  "Internet / Téléphone mobile": {
+    cn: "bg-orange-400",
+    oklch: "oklch(.75 .183 55.934)",
+  },
+  "Loisirs & Sorties": {
+    cn: "bg-yellow-400",
+    oklch: "oklch(.852 .199 91.936)",
+  },
+  "Virement interne": { cn: "bg-sky-400", oklch: "oklch(.746 .16 232.661)" },
+  "Scolarité & Enfants": {
+    cn: "bg-rose-400",
+    oklch: "oklch(.712 .194 13.428)",
+  },
 };

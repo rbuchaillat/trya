@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getLastMonthDates } from "@/utils/date";
+import { getMonthDates } from "@/utils/date";
 import { prisma } from "@/lib/prisma";
 import {
   BankAccountResponse,
@@ -104,7 +104,9 @@ export async function POST(request: NextRequest) {
 
       case "item.account.created":
         try {
-          const { startDate } = getLastMonthDates();
+          const { startDate } = getMonthDates(
+            new Date(new Date().getFullYear(), new Date().getMonth() - 1)
+          );
           const minDate = startDate.split("T")[0];
 
           const [responseBankAccount, responseTransactions] = await Promise.all(

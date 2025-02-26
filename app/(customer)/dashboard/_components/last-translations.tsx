@@ -53,6 +53,7 @@ export const LastTranslations = async () => {
                       width={36}
                       height={36}
                       alt="Provider logo"
+                      priority
                     />
                   )}
                 </td>
@@ -75,6 +76,11 @@ export const LastTranslations = async () => {
               </tr>
             );
           })}
+          {transactions.length === 0 && (
+            <tr className="block pb-4">
+              <td>Connectez un compte contenant des transactions</td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

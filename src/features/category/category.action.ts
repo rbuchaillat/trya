@@ -8,3 +8,21 @@ export const getCategories = async () => {
   });
   return categories;
 };
+
+export const getCategoriesWithTransactions = async ({
+  userId,
+  startDate,
+  endDate,
+}: {
+  userId: string;
+  startDate: string;
+  endDate: string;
+}) => {
+  const categories = await prisma.category.findMany({
+    where: { transactions: { some: { bankAccount: { item: { userId } } } } },
+    include: {
+      transactions: { where: { date: { gte: startDate, lte: endDate } } },
+    },
+  });
+  return categories.filter((category) => category.name !== "Revenus");
+};

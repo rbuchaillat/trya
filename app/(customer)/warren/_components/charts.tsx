@@ -10,7 +10,7 @@ export const Charts = ({ data, colors }: { data: any[]; colors: string[] }) => {
   if (!isMounted) return null;
 
   return (
-    <PieChart width={225} height={250}>
+    <PieChart width={200} height={200}>
       <Pie
         data={data}
         cx={95}
