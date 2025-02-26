@@ -24,5 +24,8 @@ export const getCategoriesWithTransactions = async ({
       transactions: { where: { date: { gte: startDate, lte: endDate } } },
     },
   });
-  return categories.filter((category) => category.name !== "Revenus");
+  return categories.filter(
+    (category) =>
+      category.name !== "Revenus" && category.name !== "Virement interne"
+  );
 };

@@ -1,3 +1,52 @@
+import {
+  ArrowUpDownIcon,
+  CarFrontIcon,
+  ChefHatIcon,
+  GlobeIcon,
+  HandshakeIcon,
+  HeartPulseIcon,
+  HouseIcon,
+  LayersIcon,
+  LucideProps,
+  PartyPopperIcon,
+  PiggyBankIcon,
+  PlaneTakeoffIcon,
+  ReceiptTextIcon,
+  SchoolIcon,
+  ShoppingBagIcon,
+  SmartphoneIcon,
+  SparklesIcon,
+  UtensilsIcon,
+  WalletIcon,
+} from "lucide-react";
+import { ForwardRefExoticComponent, RefAttributes } from "react";
+
+export const ICONS: Record<
+  string,
+  ForwardRefExoticComponent<
+    Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
+  >
+> = {
+  Abonnements: SmartphoneIcon,
+  Alimentation: UtensilsIcon,
+  Divers: LayersIcon,
+  Logement: HouseIcon,
+  Restaurant: ChefHatIcon,
+  Revenus: WalletIcon,
+  Santé: HeartPulseIcon,
+  Voyages: PlaneTakeoffIcon,
+  "Achats & Shopping": ShoppingBagIcon,
+  "Auto & Transports": CarFrontIcon,
+  "Dons et charité": HandshakeIcon,
+  "Épargne et investissements": PiggyBankIcon,
+  "Esthétique & Soins": SparklesIcon,
+  "Impôts & Taxes": ReceiptTextIcon,
+  "Internet / Téléphone mobile": GlobeIcon,
+  "Loisirs & Sorties": PartyPopperIcon,
+  "Virement interne": ArrowUpDownIcon,
+  "Scolarité & Enfants": SchoolIcon,
+};
+
 export const INCOME_BRACKETS = [
   { max: 1000, needs: 85, wants: 10, savings: 5 },
   { max: 1300, needs: 80, wants: 12, savings: 8 },
