@@ -3,6 +3,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChartPieIcon, HandCoinsIcon } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { getTransactionsByUserId } from "@/features/transaction/transaction.action";
 import { requiredCurrentUser } from "@/features/user/user.action";
 import {
@@ -181,17 +187,16 @@ export const DistributionList = () => {
           </div>
         </div>
       </div>
-      <div className="bg-white p-3 rounded-xl shadow-md grid gap-y-4">
-        <div className="flex gap-2 items-center">
+
+      <div>
+        <div className="flex gap-2 items-center pb-4">
           <div className="bg-slate-100 p-1.5 rounded-md">
             <HandCoinsIcon size={14} className="text-slate-500" />
           </div>
           <div className="flex flex-col">
             <span className="text-slate-800 font-medium">
               Récapitulatif des dépenses:{" "}
-              <span className="font-bold">
-                {(needs.total + wants.total + savings.total).toFixed(2)} €
-              </span>
+              <span className="font-bold">{totalExpenses.toFixed(2)} €</span>
             </span>
             <span className="text-xs text-slate-500 italic">
               Comparez vos dépenses réelles avec celles recommandées. Visualisez
@@ -200,111 +205,162 @@ export const DistributionList = () => {
             </span>
           </div>
         </div>
-        <div className="grid gap-10 grid-cols-3">
-          <div className="flex flex-col gap-y-2">
-            <strong className="flex gap-2 items-center text-sm">
-              <div className="size-3 rounded-full bg-blue-400" />
-              Besoins:{" "}
-              <span
-                className={cn({
-                  "text-green-500": isWithinLimitOrSlightlyAbove(
-                    needs.total,
-                    plan.needs
-                  ),
-                  "text-orange-500": isModeratelyAboveLimit(
-                    needs.total,
-                    plan.needs
-                  ),
-                  "text-red-500": isSignificantlyAboveLimit(
-                    needs.total,
-                    plan.needs
-                  ),
-                })}
-              >
-                {needs.total} €
-              </span>{" "}
-              / {plan.needs} €
-            </strong>
-            <div className="grid gap-y-0.5 text-xs">
+        <Accordion
+          className="bg-white rounded-xl shadow-md overflow-hidden"
+          type="single"
+          collapsible
+        >
+          <AccordionItem value="item-1">
+            <AccordionTrigger className="items-center">
+              <div className="flex w-full justify-between items-center">
+                <div className="flex gap-x-4 items-center">
+                  <div className="size-8 rounded-full bg-blue-400" />
+                  <div className="text-sm">Besoins</div>
+                </div>
+                <strong>
+                  <span
+                    className={cn({
+                      "text-green-500": isWithinLimitOrSlightlyAbove(
+                        needs.total,
+                        plan.needs
+                      ),
+                      "text-orange-500": isModeratelyAboveLimit(
+                        needs.total,
+                        plan.needs
+                      ),
+                      "text-red-500": isSignificantlyAboveLimit(
+                        needs.total,
+                        plan.needs
+                      ),
+                    })}
+                  >
+                    {needs.total} €
+                  </span>{" "}
+                  / {plan.needs} €
+                </strong>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
               {mergeExpenses(needs.expenses).map((needExpense, index) => {
                 return (
-                  <div key={index} className="border-b border-gray-100 p-1">
-                    {needExpense.clean_description}:{" "}
-                    {Math.abs(needExpense.amount).toFixed(2)} €
+                  <div
+                    key={index}
+                    className="flex gap-x-2 py-2 ml-[52px] border-b text-xs border-gray-100 text-slate-500 justify-between items-center"
+                  >
+                    <div className="flex gap-x-3">
+                      <div className="size-3 rounded-full bg-blue-400" />
+                      {needExpense.clean_description}
+                    </div>
+                    <strong>
+                      {needExpense.amount.toFixed(2)}{" "}
+                      <span className="text-slate-300">€</span>
+                    </strong>
                   </div>
                 );
               })}
-            </div>
-          </div>
-          <div className="flex flex-col gap-y-2">
-            <strong className="flex gap-2 items-center text-sm">
-              <div className="size-3 rounded-full bg-green-400" /> Envies:{" "}
-              <span
-                className={cn({
-                  "text-green-500": isWithinLimitOrSlightlyAbove(
-                    wants.total,
-                    plan.wants
-                  ),
-                  "text-orange-500": isModeratelyAboveLimit(
-                    wants.total,
-                    plan.wants
-                  ),
-                  "text-red-500": isSignificantlyAboveLimit(
-                    wants.total,
-                    plan.wants
-                  ),
-                })}
-              >
-                {wants.total} €
-              </span>{" "}
-              / {plan.wants} €
-            </strong>
-            <div className="grid gap-y-0.5 text-xs">
-              {mergeExpenses(wants.expenses).map((wantExpense, index) => {
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-2">
+            <AccordionTrigger className="items-center">
+              <div className="flex w-full justify-between items-center">
+                <div className="flex gap-x-4 items-center">
+                  <div className="size-8 rounded-full bg-green-400" />
+                  <div className="text-sm">Envies</div>
+                </div>
+                <strong>
+                  <span
+                    className={cn({
+                      "text-green-500": isWithinLimitOrSlightlyAbove(
+                        wants.total,
+                        plan.wants
+                      ),
+                      "text-orange-500": isModeratelyAboveLimit(
+                        wants.total,
+                        plan.wants
+                      ),
+                      "text-red-500": isSignificantlyAboveLimit(
+                        wants.total,
+                        plan.wants
+                      ),
+                    })}
+                  >
+                    {wants.total} €
+                  </span>{" "}
+                  / {plan.wants} €
+                </strong>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              {mergeExpenses(wants.expenses).map((needExpense, index) => {
                 return (
-                  <div key={index} className="border-b border-gray-100 p-1">
-                    {wantExpense.clean_description}:{" "}
-                    {Math.abs(wantExpense.amount).toFixed(2)} €
+                  <div
+                    key={index}
+                    className="flex gap-x-2 py-2 ml-[52px] border-b text-xs border-gray-100 text-slate-500 justify-between items-center"
+                  >
+                    <div className="flex gap-x-3">
+                      <div className="size-3 rounded-full bg-green-400" />
+                      {needExpense.clean_description}
+                    </div>
+                    <strong>
+                      {needExpense.amount.toFixed(2)}{" "}
+                      <span className="text-slate-300">€</span>
+                    </strong>
                   </div>
                 );
               })}
-            </div>
-          </div>
-          <div className="flex flex-col gap-y-2">
-            <strong className="flex gap-2 items-center text-sm">
-              <div className="size-3 rounded-full bg-yellow-400" /> Épargne:{" "}
-              <span
-                className={cn({
-                  "text-green-500": isAboveOrNotTooBelow(
-                    savings.total,
-                    plan.savings
-                  ),
-                  "text-orange-500": isModeratelyBelow(
-                    savings.total,
-                    plan.savings
-                  ),
-                  "text-red-500": isSignificantlyBelow(
-                    savings.total,
-                    plan.savings
-                  ),
-                })}
-              >
-                {savings.total} €
-              </span>{" "}
-              / {plan.savings} €
-            </strong>
-            <div className="grid gap-y-0.5 text-xs">
-              {mergeExpenses(savings.expenses).map((savingExpense, index) => {
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-3">
+            <AccordionTrigger className="items-center">
+              <div className="flex w-full justify-between items-center">
+                <div className="flex gap-x-4 items-center">
+                  <div className="size-8 rounded-full bg-yellow-400" />
+                  <div className="text-sm">Épargne</div>
+                </div>
+                <strong>
+                  <span
+                    className={cn({
+                      "text-green-500": isAboveOrNotTooBelow(
+                        savings.total,
+                        plan.savings
+                      ),
+                      "text-orange-500": isModeratelyBelow(
+                        savings.total,
+                        plan.savings
+                      ),
+                      "text-red-500": isSignificantlyBelow(
+                        savings.total,
+                        plan.savings
+                      ),
+                    })}
+                  >
+                    {savings.total} €
+                  </span>{" "}
+                  / {plan.savings} €
+                </strong>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              {mergeExpenses(savings.expenses).map((needExpense, index) => {
                 return (
-                  <div key={index} className="border-b border-gray-100 p-1">
-                    {savingExpense.clean_description}:{" "}
-                    {Math.abs(savingExpense.amount).toFixed(2)} €
+                  <div
+                    key={index}
+                    className="flex gap-x-2 py-2 ml-[52px] border-b text-xs border-gray-100 text-slate-500 justify-between items-center"
+                  >
+                    <div className="flex gap-x-3">
+                      <div className="size-3 rounded-full bg-yellow-400" />
+                      {needExpense.clean_description}
+                    </div>
+                    <strong>
+                      {needExpense.amount.toFixed(2)}{" "}
+                      <span className="text-slate-300">€</span>
+                    </strong>
                   </div>
                 );
               })}
-            </div>
-          </div>
-        </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </div>
   );

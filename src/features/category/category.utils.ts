@@ -35,8 +35,9 @@ function categorizeTransaction(
 function calculateTotalExpenses(
   transactions: TransactionWithCategory[]
 ): number {
-  return Math.abs(
-    transactions.reduce((total, transaction) => total + transaction.amount, 0)
+  return transactions.reduce(
+    (total, transaction) => total + transaction.amount,
+    0
   );
 }
 
@@ -50,16 +51,16 @@ export function categorizeBudget(userTransactions: UserTransactions) {
   userTransactions.items.forEach((item) =>
     item.bankAccounts.forEach((bankAccount) =>
       bankAccount.transactions.forEach((transaction) => {
-        if (!transaction.category || transaction.amount > 0) return;
+        if (!transaction.category) return;
         const category = categorizeTransaction(transaction);
         if (category) budget[category].push(transaction);
       })
     )
   );
 
-  const needsTotal = +calculateTotalExpenses(budget.needs).toFixed(2);
-  const wantsTotal = +calculateTotalExpenses(budget.wants).toFixed(2);
-  const savingsTotal = +calculateTotalExpenses(budget.savings).toFixed(2);
+  const needsTotal = -calculateTotalExpenses(budget.needs).toFixed(2);
+  const wantsTotal = -calculateTotalExpenses(budget.wants).toFixed(2);
+  const savingsTotal = -calculateTotalExpenses(budget.savings).toFixed(2);
 
   const needs = { expenses: budget.needs, total: needsTotal };
   const wants = { expenses: budget.wants, total: wantsTotal };

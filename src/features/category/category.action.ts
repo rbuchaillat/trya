@@ -19,7 +19,11 @@ export const getCategoriesWithTransactions = async ({
   endDate: string;
 }) => {
   const categories = await prisma.category.findMany({
-    where: { transactions: { some: { bankAccount: { item: { userId } } } } },
+    where: {
+      transactions: {
+        some: { bankAccount: { type: "checking", item: { userId } } },
+      },
+    },
     include: {
       transactions: { where: { date: { gte: startDate, lte: endDate } } },
     },
